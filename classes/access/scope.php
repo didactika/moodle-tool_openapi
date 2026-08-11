@@ -104,4 +104,29 @@ final class scope {
     public function allowed_functions(): ?array {
         return $this->unrestricted ? null : $this->allowedfunctions;
     }
+
+    /**
+     * Trim a document's paths down to what this scope allows.
+     *
+     * Same recorte as generator\service_filter, applied by function name
+     * instead of by service shortname -- kept here, not there, because
+     * this is the scope's own concern: what an already-authorized accessor
+     * gets to see, independent of whether a ?service= was also requested.
+     *
+     * @param array $document A document as returned by document_builder::build().
+     * @return array A copy of $document with paths trimmed to this scope.
+     */
+    public function restrict(array $document): array {
+        if ($this->unrestricted) {
+            return $document;
+        }
+
+        $allowedpaths = array_map(
+            static fn (string $name): string => '/' . $name,
+            $this->allowedfunctions
+        );
+        $document['paths'] = array_intersect_key($document['paths'], array_flip($allowedpaths));
+
+        return $document;
+    }
 }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for tool_openapi
+ * Cache definitions for tool_openapi
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -25,13 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['cacheheading'] = 'Cache';
-$string['cacheheading_desc'] = 'The full webservice catalog is cached; see the plugin documentation for when it is purged automatically.';
-$string['cachepurged'] = 'The OpenAPI catalog cache has been purged.';
-$string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
-$string['openapi:manage'] = 'Manage OpenAPI documentation settings, tokens and IP rules';
-$string['openapi:view'] = 'View the OpenAPI documentation';
-$string['openapi:viewfullcatalog'] = 'View the full webservice catalog with a Moodle session';
-$string['pluginname'] = 'OpenAPI documentation';
-$string['purgecache'] = 'Purge OpenAPI catalog cache';
-$string['regeneratespectask'] = 'Regenerate the cached OpenAPI catalog document';
+$definitions = [
+    // The full catalog document (document_builder::build()). Application-wide,
+    // never invalidated by hand in normal operation: Moodle's own plugin
+    // install/upgrade/uninstall cycle (upgrade_noncore(), see
+    // 02-arquitectura.md's "Invalidacion de cache") already purges every
+    // application cache at the only moment external_functions can actually
+    // change, which is why there is no event observer here. The per-service
+    // recorte (generator\service_filter) is deliberately never cached at
+    // all -- see that class's own docblock.
+    'document' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => false,
+        'staticacceleration' => true,
+    ],
+];
