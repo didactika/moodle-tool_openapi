@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="admin/tool/openapi/db" VERSION="2026081101" COMMENT="XMLDB file for tool_openapi">
+  <TABLES>
+    <TABLE NAME="tool_openapi_tokens" COMMENT="Plugin-issued tokens, for reading the documentation only">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Label, so an admin can tell which integrator this token is"/>
+        <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true" COMMENT="SHA-256 of the token, never the plaintext"/>
+        <FIELD NAME="allowedfunctions" TYPE="text" NOTNULL="false" COMMENT="One function name per line; null means the full catalog"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Personal data, covered by the privacy provider"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="revoked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="createdby_fk" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="tokenhash" UNIQUE="true" FIELDS="tokenhash"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="tool_openapi_ip_rules" COMMENT="IP allowlist entries, each with its own optional function scope">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="iprange" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="A single IP or CIDR range, as address_in_subnet() expects"/>
+        <FIELD NAME="description" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="What this entry is, for whoever reads it later"/>
+        <FIELD NAME="allowedfunctions" TYPE="text" NOTNULL="false" COMMENT="One function name per line; null means the full catalog"/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="enabled" UNIQUE="false" FIELDS="enabled"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

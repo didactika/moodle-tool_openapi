@@ -16,6 +16,8 @@
 
 namespace tool_openapi\generator;
 
+use tool_openapi\local\service_functions;
+
 /**
  * Trims an already-built OpenAPI document down to one external service.
  *
@@ -41,25 +43,10 @@ final class service_filter {
      * @throws \moodle_exception If no service has that shortname.
      */
     public static function filter(array $document, string $serviceshortname): array {
-        global $DB;
-
-        $service = $DB->get_record(
-            'external_services',
-            ['shortname' => $serviceshortname],
-            'id',
-            IGNORE_MISSING
+        $allowedpaths = array_map(
+            static fn (string $name): string => '/' . $name,
+            service_functions::for_shortname($serviceshortname)
         );
-        if (!$service) {
-            throw new \moodle_exception('invalidservice', 'tool_openapi', '', $serviceshortname);
-        }
-
-        $functionnames = $DB->get_fieldset_select(
-            'external_services_functions',
-            'functionname',
-            'externalserviceid = ?',
-            [$service->id]
-        );
-        $allowedpaths = array_map(static fn (string $name): string => '/' . $name, $functionnames);
 
         $document['paths'] = array_intersect_key($document['paths'], array_flip($allowedpaths));
 
