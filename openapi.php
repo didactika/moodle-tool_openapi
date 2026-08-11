@@ -36,7 +36,10 @@
 
 define('NO_DEBUG_DISPLAY', true);
 
-require(__DIR__ . '/../../../config.php');
+// Access is decided by access_checker below, not a single require_login() call: session/IP/token/
+// wstoken gates are OR'd, and forcing require_login() would redirect an unauthenticated IP/token/
+// wstoken caller to the login page instead of a JSON 403.
+require(__DIR__ . '/../../../config.php'); // phpcs:ignore moodle.Files.RequireLogin.Missing
 
 /**
  * Send a minimal JSON error body and stop.
