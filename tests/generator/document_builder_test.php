@@ -101,7 +101,7 @@ final class document_builder_test extends \advanced_testcase {
         foreach ($DB->get_records('external_functions', null, 'name ASC') as $function) {
             try {
                 $info = \core_external\external_api::external_function_info($function);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 continue;
             }
             if ($info->deprecated ?? false) {
