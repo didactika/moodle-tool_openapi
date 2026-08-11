@@ -196,6 +196,10 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+          # phpmd is noisy on test doubles (unused interface parameters, etc.) in a way
+          # that doesn't apply to real plugin code -- every other checker (phpcs, phplint,
+          # phpdoc, phpunit) still runs against tests/ in full, only phpmd skips it.
+          PHPMD_IGNORE_PATHS: 'tests'
           # Uncomment this to run Behat tests using the Moodle App.
           # MOODLE_APP: 'true'
 
