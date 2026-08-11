@@ -50,8 +50,10 @@ final class document_builder {
 
         $paths = [];
         foreach ($DB->get_records('external_functions', null, 'name ASC') as $function) {
-            $info = external_api::external_function_info($function);
-            $paths['/' . $info->name] = self::build_path_item($info);
+            $item = self::build_path_or_skip($function);
+            if ($item !== null) {
+                $paths['/' . $function->name] = $item;
+            }
         }
 
         return [
@@ -77,6 +79,34 @@ final class document_builder {
             'version' => $CFG->release,
             'description' => 'Generated from this site\'s external_functions catalog by tool_openapi.',
         ];
+    }
+
+    /**
+     * Introspect one function and build its path item, or null if it can't
+     * be introspected.
+     *
+     * Confirmed for real, not hypothetical: a stock Moodle 4.5 site can
+     * have an installed function (mod_quiz's add_random_questions, seen in
+     * CI) whose implementation class does not autoload and has no working
+     * legacy classpath fallback either, so external_function_info() throws.
+     * One such function must not take down the whole catalog.
+     *
+     * @param \stdClass $function A raw external_functions row.
+     * @return array|null
+     */
+    private static function build_path_or_skip(\stdClass $function): ?array {
+        try {
+            $info = external_api::external_function_info($function);
+        } catch (\Throwable $e) {
+            debugging(
+                "tool_openapi: skipping external function '{$function->name}', could not introspect it: "
+                    . $e->getMessage(),
+                DEBUG_DEVELOPER
+            );
+            return null;
+        }
+
+        return self::build_path_item($info);
     }
 
     /**
