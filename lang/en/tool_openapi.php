@@ -18,7 +18,7 @@
  * Language strings for tool_openapi
  *
  * @package    tool_openapi
- * @author     Hector Arrechea
+ * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
