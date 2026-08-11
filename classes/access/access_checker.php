@@ -32,9 +32,14 @@ namespace tool_openapi\access;
  */
 final class access_checker {
     /**
+     * Creates a checker from an explicit list of gates.
+     *
      * @param access_gate[] $gates
      */
-    public function __construct(private readonly array $gates) {
+    public function __construct(
+        /** @var access_gate[] Gates tried in order; the first enabled, authorizing gate wins. */
+        private readonly array $gates,
+    ) {
     }
 
     /**
@@ -52,6 +57,8 @@ final class access_checker {
     }
 
     /**
+     * Authorizes a request by trying each enabled gate in order.
+     *
      * @param string|null $requestedservice The ?service= query param, if any.
      * @return scope|null Null if no enabled gate authorizes the request.
      */

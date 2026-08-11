@@ -32,6 +32,8 @@ namespace tool_openapi\access;
  */
 final class ip_gate_test extends \advanced_testcase {
     /**
+     * Inserts a tool_openapi_ip_rules row.
+     *
      * @param string $iprange
      * @param string|null $allowedfunctions
      * @param int $enabled

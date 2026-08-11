@@ -42,6 +42,8 @@ use tool_openapi\local\service_functions;
  */
 final class session_gate implements access_gate {
     /**
+     * Whether the session gate is turned on.
+     *
      * @return bool
      */
     public function is_enabled(): bool {
@@ -49,6 +51,8 @@ final class session_gate implements access_gate {
     }
 
     /**
+     * Authorizes via the current user's session and capabilities.
+     *
      * @param string|null $requestedservice
      * @return scope|null
      */

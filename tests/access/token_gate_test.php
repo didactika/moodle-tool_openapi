@@ -39,6 +39,8 @@ final class token_gate_test extends \advanced_testcase {
     }
 
     /**
+     * Inserts a tool_openapi_tokens row for the given plaintext token.
+     *
      * @param string $plaintext
      * @param string|null $allowedfunctions
      * @param int $revoked

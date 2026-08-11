@@ -27,11 +27,15 @@ namespace tool_openapi\access;
  */
 final class scope {
     /**
+     * Creates a scope with an explicit restriction state.
+     *
      * @param bool $unrestricted
      * @param string[] $allowedfunctions Ignored when $unrestricted is true.
      */
     private function __construct(
+        /** @var bool Whether every function in the catalog is allowed. */
         private readonly bool $unrestricted,
+        /** @var string[] Allowed function names, ignored when $unrestricted is true. */
         private readonly array $allowedfunctions,
     ) {
     }
@@ -74,6 +78,8 @@ final class scope {
     }
 
     /**
+     * Whether this scope allows the full catalog.
+     *
      * @return bool
      */
     public function is_unrestricted(): bool {
@@ -81,6 +87,8 @@ final class scope {
     }
 
     /**
+     * Whether this scope allows the given function name.
+     *
      * @param string $functionname
      * @return bool
      */
@@ -89,6 +97,8 @@ final class scope {
     }
 
     /**
+     * The allowed function names, or null when unrestricted.
+     *
      * @return string[]|null Null when unrestricted.
      */
     public function allowed_functions(): ?array {

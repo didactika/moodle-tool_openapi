@@ -36,6 +36,8 @@ namespace tool_openapi\access;
  */
 final class ip_gate implements access_gate {
     /**
+     * Whether the IP-rule gate is turned on.
+     *
      * @return bool
      */
     public function is_enabled(): bool {
@@ -43,6 +45,8 @@ final class ip_gate implements access_gate {
     }
 
     /**
+     * Authorizes via a matching tool_openapi_ip_rules row.
+     *
      * @param string|null $requestedservice Unused: an IP rule's scope is its own row, not the request.
      * @return scope|null
      */

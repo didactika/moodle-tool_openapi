@@ -38,12 +38,19 @@ final class access_checker_test extends \basic_testcase {
     private function always_authorizes(scope $scope): access_gate {
         return new class ($scope) implements access_gate {
             /**
+             * Stores the scope this fake gate always returns.
+             *
              * @param scope $scope
              */
-            public function __construct(private readonly scope $scope) {
+            public function __construct(
+                /** @var scope Scope returned by authorize(). */
+                private readonly scope $scope,
+            ) {
             }
 
             /**
+             * Always enabled.
+             *
              * @return bool
              */
             public function is_enabled(): bool {
@@ -51,6 +58,8 @@ final class access_checker_test extends \basic_testcase {
             }
 
             /**
+             * Always authorizes with the stored scope.
+             *
              * @param string|null $requestedservice
              * @return scope|null
              */
@@ -68,6 +77,8 @@ final class access_checker_test extends \basic_testcase {
     private function never_authorizes(): access_gate {
         return new class implements access_gate {
             /**
+             * Always enabled.
+             *
              * @return bool
              */
             public function is_enabled(): bool {
@@ -75,6 +86,8 @@ final class access_checker_test extends \basic_testcase {
             }
 
             /**
+             * Never authorizes.
+             *
              * @param string|null $requestedservice
              * @return scope|null
              */
@@ -92,6 +105,8 @@ final class access_checker_test extends \basic_testcase {
     private function disabled_but_would_authorize(): access_gate {
         return new class implements access_gate {
             /**
+             * Always disabled.
+             *
              * @return bool
              */
             public function is_enabled(): bool {
@@ -99,6 +114,8 @@ final class access_checker_test extends \basic_testcase {
             }
 
             /**
+             * Would authorize with the full catalog if ever consulted.
+             *
              * @param string|null $requestedservice
              * @return scope|null
              */

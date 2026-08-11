@@ -35,6 +35,8 @@ final class wstoken_gate_test extends \advanced_testcase {
     }
 
     /**
+     * Creates an external_services row wired to one function.
+     *
      * @param int $enabled
      * @return int The service id.
      */
@@ -59,6 +61,8 @@ final class wstoken_gate_test extends \advanced_testcase {
     }
 
     /**
+     * Inserts an external_tokens row for the given service.
+     *
      * @param int $serviceid
      * @param string $token
      * @param int|null $validuntil

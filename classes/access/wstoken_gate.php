@@ -38,6 +38,8 @@ use tool_openapi\local\service_functions;
  */
 final class wstoken_gate implements access_gate {
     /**
+     * Whether the wstoken-reuse gate is turned on.
+     *
      * @return bool
      */
     public function is_enabled(): bool {
@@ -45,6 +47,8 @@ final class wstoken_gate implements access_gate {
     }
 
     /**
+     * Authorizes via an existing Moodle webservice token.
+     *
      * @param string|null $requestedservice Unused: the scope is always the token's own service.
      * @return scope|null
      */

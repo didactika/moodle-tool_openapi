@@ -32,6 +32,8 @@ namespace tool_openapi\access;
  */
 final class token_gate implements access_gate {
     /**
+     * Whether the plugin-token gate is turned on.
+     *
      * @return bool
      */
     public function is_enabled(): bool {
@@ -39,6 +41,8 @@ final class token_gate implements access_gate {
     }
 
     /**
+     * Authorizes via a plugin-issued Bearer token.
+     *
      * @param string|null $requestedservice Unused: a plugin token's scope is its own row, not the request.
      * @return scope|null
      */
@@ -82,6 +86,8 @@ final class token_gate implements access_gate {
     }
 
     /**
+     * The raw Authorization header value, if any.
+     *
      * @return string|null
      */
     private static function authorization_header(): ?string {
