@@ -119,7 +119,7 @@ jobs:
             done <<< "$phps"
           done
 
-          matrix=$(jq -c -n --argjson include "$include" '{include: $include}')
+          matrix=$(jq -c -n --argjson include "$include" '{"include": $include}')
           echo "Generated test matrix:"
           echo "$matrix" | jq .
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
