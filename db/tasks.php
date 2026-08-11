@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for tool_openapi
+ * Scheduled tasks for tool_openapi
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -25,13 +25,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['cacheheading'] = 'Cache';
-$string['cacheheading_desc'] = 'The full webservice catalog is cached; see the plugin documentation for when it is purged automatically.';
-$string['cachepurged'] = 'The OpenAPI catalog cache has been purged.';
-$string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
-$string['openapi:manage'] = 'Manage OpenAPI documentation settings, tokens and IP rules';
-$string['openapi:view'] = 'View the OpenAPI documentation';
-$string['openapi:viewfullcatalog'] = 'View the full webservice catalog with a Moodle session';
-$string['pluginname'] = 'OpenAPI documentation';
-$string['purgecache'] = 'Purge OpenAPI catalog cache';
-$string['regeneratespectask'] = 'Regenerate the cached OpenAPI catalog document';
+$tasks = [
+    // Rebuild the cached catalog document hourly, so a purge (this task's
+    // own last run, or a plugin install/upgrade/uninstall) never leaves a
+    // real request to pay the full build cost. See the task's own docblock.
+    [
+        'classname' => 'tool_openapi\task\regenerate_spec_task',
+        'blocking' => 0,
+        'minute' => '5',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+];

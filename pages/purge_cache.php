@@ -15,7 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for tool_openapi
+ * Purges the cached OpenAPI catalog document, then returns to settings.
+ *
+ * Not a self-invalidating cache in the usual sense -- see db/caches.php --
+ * this is only the manual override for an administrator who does not want
+ * to wait for the next scheduled regenerate_spec_task run.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -23,15 +27,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require(__DIR__ . '/../../../../config.php');
 
-$string['cacheheading'] = 'Cache';
-$string['cacheheading_desc'] = 'The full webservice catalog is cached; see the plugin documentation for when it is purged automatically.';
-$string['cachepurged'] = 'The OpenAPI catalog cache has been purged.';
-$string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
-$string['openapi:manage'] = 'Manage OpenAPI documentation settings, tokens and IP rules';
-$string['openapi:view'] = 'View the OpenAPI documentation';
-$string['openapi:viewfullcatalog'] = 'View the full webservice catalog with a Moodle session';
-$string['pluginname'] = 'OpenAPI documentation';
-$string['purgecache'] = 'Purge OpenAPI catalog cache';
-$string['regeneratespectask'] = 'Regenerate the cached OpenAPI catalog document';
+require_login();
+require_capability('tool/openapi:manage', \context_system::instance());
+require_sesskey();
+
+\tool_openapi\local\document_cache::purge();
+
+redirect(
+    new moodle_url('/admin/settings.php', ['section' => 'tool_openapi']),
+    get_string('cachepurged', 'tool_openapi'),
+    null,
+    \core\output\notification::NOTIFY_SUCCESS
+);

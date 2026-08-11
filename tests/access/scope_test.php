@@ -74,4 +74,63 @@ final class scope_test extends \basic_testcase {
             $scope->allowed_functions()
         );
     }
+
+    /**
+     * A minimal two-path document, for restrict() to trim.
+     *
+     * @return array
+     */
+    private function document(): array {
+        return [
+            'openapi' => '3.1.0',
+            'info' => ['title' => 'test'],
+            'paths' => [
+                '/core_course_get_courses' => ['post' => []],
+                '/core_course_get_contents' => ['post' => []],
+            ],
+            'components' => ['schemas' => []],
+        ];
+    }
+
+    /**
+     * An unrestricted scope leaves the document untouched.
+     */
+    public function test_restrict_full_catalog_leaves_the_document_untouched(): void {
+        $document = $this->document();
+
+        $this->assertSame($document, scope::full_catalog()->restrict($document));
+    }
+
+    /**
+     * A limited scope keeps only its own allowed paths.
+     */
+    public function test_restrict_limited_scope_keeps_only_allowed_paths(): void {
+        $document = $this->document();
+
+        $restricted = scope::limited_to(['core_course_get_courses'])->restrict($document);
+
+        $this->assertSame(['/core_course_get_courses'], array_keys($restricted['paths']));
+    }
+
+    /**
+     * restrict() only touches paths, not the rest of the envelope.
+     */
+    public function test_restrict_preserves_the_rest_of_the_envelope(): void {
+        $document = $this->document();
+
+        $restricted = scope::limited_to(['core_course_get_courses'])->restrict($document);
+
+        $this->assertSame($document['openapi'], $restricted['openapi']);
+        $this->assertSame($document['info'], $restricted['info']);
+        $this->assertSame($document['components'], $restricted['components']);
+    }
+
+    /**
+     * A scope limited to a function absent from the document yields no paths.
+     */
+    public function test_restrict_with_no_matching_function_yields_no_paths(): void {
+        $restricted = scope::limited_to(['does_not_exist'])->restrict($this->document());
+
+        $this->assertSame([], $restricted['paths']);
+    }
 }
