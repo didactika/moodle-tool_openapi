@@ -62,7 +62,6 @@ final class access_checker_test extends \basic_testcase {
              *
              * @param string|null $requestedservice
              * @return scope|null
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
              */
             public function authorize(?string $requestedservice): ?scope {
                 return $this->scope;
@@ -91,7 +90,6 @@ final class access_checker_test extends \basic_testcase {
              *
              * @param string|null $requestedservice
              * @return scope|null
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
              */
             public function authorize(?string $requestedservice): ?scope {
                 return null;
@@ -120,7 +118,6 @@ final class access_checker_test extends \basic_testcase {
              *
              * @param string|null $requestedservice
              * @return scope|null
-             * @SuppressWarnings(PHPMD.UnusedFormalParameter)
              */
             public function authorize(?string $requestedservice): ?scope {
                 return scope::full_catalog();
