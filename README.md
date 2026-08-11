@@ -9,7 +9,7 @@ has no plugin logic — see `CHANGELOG.md` for what has actually shipped.
 
 ## Requirements
 
-Moodle 4.5 through 5.3 (`$plugin->supported` in `version.php`).
+Moodle 4.5 through 5.2 (`$plugin->supported` in `version.php`).
 
 ## Development
 

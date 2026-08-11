@@ -11,6 +11,11 @@ name: Release on version bump
 # safe across branches too: two different lines are expected to use their
 # own distinct release numbers, same as they would with separate npm majors.
 #
+# It also does nothing while $plugin->maturity is MATURITY_ALPHA, regardless
+# of $plugin->release -- there is nothing to gate a first release on
+# otherwise, and version.php gets touched (bumping $plugin->version for an
+# upgrade step) long before there is anything worth tagging.
+#
 # This plugin has no other release surface: there is no package registry to
 # publish to and no environment to deploy to, just this zip attached to a
 # GitHub Release (see README.md).
@@ -40,14 +45,24 @@ jobs:
         run: |
           release=$(grep -oP '\$plugin->release\s*=\s*'\''\K[^'\'']+' version.php)
           version=$(grep -oP '\$plugin->version\s*=\s*\K[0-9]+' version.php)
+          maturity=$(grep -oP '\$plugin->maturity\s*=\s*\K[A-Z_]+' version.php)
           if [ -z "$release" ]; then
             echo "::error::Could not parse \$plugin->release from version.php"
             exit 1
           fi
           echo "release=$release" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "maturity=$maturity" >> "$GITHUB_OUTPUT"
           echo "tag=v$release" >> "$GITHUB_OUTPUT"
-          echo "Detected release v$release (version $version)"
+          echo "Detected release v$release (version $version, $maturity)"
+
+      # MATURITY_ALPHA means "nothing here works yet" -- tagging and
+      # publishing a GitHub Release for that is misleading regardless of
+      # what $plugin->release says. Raise $plugin->maturity to at least
+      # MATURITY_BETA when the plugin is ready for its first real release.
+      - name: Skip releasing while still MATURITY_ALPHA
+        if: steps.ver.outputs.maturity == 'MATURITY_ALPHA'
+        run: echo "::notice::maturity is MATURITY_ALPHA, not tagging or releasing ${{ steps.ver.outputs.tag }}"
 
       - name: Derive plugin name from version.php
         id: plugin
@@ -104,7 +119,7 @@ jobs:
           fi
 
       - name: Extract release notes from CHANGELOG.md
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' && steps.ver.outputs.maturity != 'MATURITY_ALPHA'
         id: notes
         run: |
           release='${{ steps.ver.outputs.release }}'
@@ -120,7 +135,7 @@ jobs:
           cat release_notes.md
 
       - name: Build plugin release zip
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' && steps.ver.outputs.maturity != 'MATURITY_ALPHA'
         id: zip
         run: |
           # Package the plugin into a zip file. Filename and internal folder
@@ -132,7 +147,7 @@ jobs:
           unzip -l "$zipname"
 
       - name: Create tag and release
-        if: steps.check.outputs.exists == 'false'
+        if: steps.check.outputs.exists == 'false' && steps.ver.outputs.maturity != 'MATURITY_ALPHA'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
