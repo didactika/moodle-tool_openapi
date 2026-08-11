@@ -36,7 +36,6 @@ use core_external\external_value;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class type_mapper {
-
     /**
      * Moodle PARAM_* constants that need a JSON Schema type other than the
      * "string" fallback in map(). Most of Moodle's PARAM_* validators

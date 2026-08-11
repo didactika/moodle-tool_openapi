@@ -40,11 +40,16 @@ use core_external\external_value;
  * @covers     \tool_openapi\generator\type_mapper
  */
 final class type_mapper_test extends \basic_testcase {
-
+    /**
+     * A null return description maps to null.
+     */
     public function test_returns_null_for_a_function_with_no_return_value(): void {
         $this->assertNull(type_mapper::map(null));
     }
 
+    /**
+     * Each PARAM_* constant maps to the right JSON Schema type.
+     */
     public function test_maps_scalar_param_types_to_json_schema(): void {
         $cases = [
             [PARAM_INT, ['type' => 'integer']],
@@ -63,12 +68,18 @@ final class type_mapper_test extends \basic_testcase {
         }
     }
 
+    /**
+     * A nullable value's type becomes a two-element [type, "null"] array.
+     */
     public function test_allownull_turns_type_into_a_two_element_array(): void {
         $value = new external_value(PARAM_INT, '', VALUE_REQUIRED, null, NULL_ALLOWED);
         $schema = type_mapper::map($value);
         $this->assertSame(['integer', 'null'], $schema['type']);
     }
 
+    /**
+     * A multi-line desc, indentation included, collapses to one line.
+     */
     public function test_normalises_multiline_descriptions(): void {
         // Real desc string from core_course_get_contents on both 4.5 and 5.2,
         // indentation and all, confirmed by the fase 1 spike.
@@ -79,6 +90,9 @@ final class type_mapper_test extends \basic_testcase {
         $this->assertSame('Type of completion tracking: 0 means none, 1 manual, 2 automatic.', $schema['description']);
     }
 
+    /**
+     * VALUE_REQUIRED/VALUE_DEFAULT/VALUE_OPTIONAL each map differently.
+     */
     public function test_required_tristate_matches_moodles_value_constants(): void {
         $structure = new external_single_structure([
             'id' => new external_value(PARAM_INT, 'course id', VALUE_REQUIRED, null, NULL_NOT_ALLOWED),
@@ -100,6 +114,9 @@ final class type_mapper_test extends \basic_testcase {
         $this->assertSame(['string', 'null'], $schema['properties']['idnumber']['type']);
     }
 
+    /**
+     * A nested object/array/scalar tree maps exactly, per the fase 1 spike.
+     */
     public function test_maps_the_nested_structure_confirmed_by_the_fase1_spike(): void {
         $params = new external_function_parameters([
             'options' => new external_single_structure([
@@ -137,6 +154,10 @@ final class type_mapper_test extends \basic_testcase {
         ], $schema);
     }
 
+    /**
+     * An external_description subclass that is none of the three known
+     * shapes is rejected rather than silently mismapped.
+     */
     public function test_rejects_an_unsupported_external_description_subclass(): void {
         $this->expectException(\coding_exception::class);
         type_mapper::map(new class ('', VALUE_REQUIRED, null, false) extends external_description {
