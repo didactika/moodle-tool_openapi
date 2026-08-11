@@ -25,4 +25,5 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
 $string['pluginname'] = 'OpenAPI documentation';
