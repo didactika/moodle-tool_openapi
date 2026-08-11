@@ -5,3 +5,14 @@
 lang/*
 !lang/en/
 !lang/en/**
+
+# Local moodle-plugin-ci runs (composer create-project ... ci ^4, per
+# ci.yml's own "Initialise moodle-plugin-ci" step) and its Composer
+# dependencies -- never committed, CI creates its own copy every run.
+/ci/
+/vendor/
+composer.lock
+
+# Behat faildumps from a local run, and PHPUnit's own cache.
+/moodledata/
+.phpunit.cache/

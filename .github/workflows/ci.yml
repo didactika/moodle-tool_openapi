@@ -94,7 +94,17 @@ jobs:
             exit 1
           fi
 
-          include='[]'
+          # Named "entries", not "include": jq treats `include` as reserved
+          # (its own module-loading directive), and rejects it not just as a
+          # bareword object key but as a --arg/--argjson variable name too --
+          # confirmed against jqlang/jq#1619, `jq -n --arg end 1 '{end:$end}'`
+          # fails the same way for the same reason. Quoting the key alone
+          # ("include": ...) does not fix it: the --argjson name is a second,
+          # independent place the same reserved word can't appear. The JSON
+          # output still needs a field literally called "include" -- that's
+          # GitHub Actions' own matrix schema, not jq's, and unaffected by
+          # this rename.
+          entries='[]'
           IFS=',' read -ra versions <<< "$supported_raw"
           for raw in "${versions[@]}"; do
             v=$(echo "$raw" | tr -d '[:space:]')
@@ -112,14 +122,14 @@ jobs:
 
             while IFS= read -r php; do
               for db in pgsql mariadb; do
-                include=$(echo "$include" | jq -c \
+                entries=$(echo "$entries" | jq -c \
                   --arg php "$php" --arg branch "MOODLE_${v}_STABLE" --arg db "$db" \
                   '. + [{"php": $php, "moodle-branch": $branch, "database": $db}]')
               done
             done <<< "$phps"
           done
 
-          matrix=$(jq -c -n --argjson include "$include" '{include: $include}')
+          matrix=$(jq -c -n --argjson entries "$entries" '{"include": $entries}')
           echo "Generated test matrix:"
           echo "$matrix" | jq .
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
