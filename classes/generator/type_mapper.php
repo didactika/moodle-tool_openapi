@@ -77,20 +77,7 @@ final class type_mapper {
             $schema['type'] = 'array';
             $schema['items'] = self::map($description->content);
         } else if ($description instanceof external_single_structure) {
-            $schema['type'] = 'object';
-            $schema['properties'] = [];
-            $required = [];
-            foreach ($description->keys as $key => $child) {
-                $schema['properties'][$key] = self::map($child);
-                if ($child->required === VALUE_REQUIRED) {
-                    $required[] = $key;
-                } else if ($child->required === VALUE_DEFAULT) {
-                    $schema['properties'][$key]['default'] = $child->default;
-                }
-            }
-            if ($required !== []) {
-                $schema['required'] = $required;
-            }
+            $schema += self::map_object($description);
         } else if ($description instanceof external_value) {
             $schema += self::SCALAR_TYPES[$description->type] ?? ['type' => 'string'];
         } else {
@@ -104,6 +91,38 @@ final class type_mapper {
 
         if ($description->allownull) {
             $schema['type'] = [$schema['type'], 'null'];
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Map a single_structure's own keys into the "type", "properties" and
+     * "required" of a JSON Schema object.
+     *
+     * Split out of map() so that method's own cyclomatic complexity stays
+     * under the project's threshold -- this is a real, separately-testable
+     * concern (turning a structure's keys into an object schema), not a
+     * split done only to satisfy the linter.
+     *
+     * @param external_single_structure $description
+     * @return array
+     */
+    private static function map_object(external_single_structure $description): array {
+        $properties = [];
+        $required = [];
+        foreach ($description->keys as $key => $child) {
+            $properties[$key] = self::map($child);
+            if ($child->required === VALUE_REQUIRED) {
+                $required[] = $key;
+            } else if ($child->required === VALUE_DEFAULT) {
+                $properties[$key]['default'] = $child->default;
+            }
+        }
+
+        $schema = ['type' => 'object', 'properties' => $properties];
+        if ($required !== []) {
+            $schema['required'] = $required;
         }
 
         return $schema;

@@ -50,6 +50,7 @@ require(__DIR__ . '/../../../config.php'); // phpcs:ignore moodle.Files.RequireL
  * @param int $httpstatus
  * @param string $error
  * @return never
+ * @SuppressWarnings(PHPMD.ExitExpression)
  */
 function tool_openapi_send_error(int $httpstatus, string $error): never {
     http_response_code($httpstatus);
