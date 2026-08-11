@@ -14,20 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace tool_openapi\access;
+
 /**
- * Version information for tool_openapi
+ * One way to authorize a request for the OpenAPI document.
+ *
+ * access_checker tries every enabled gate and accepts the first one that
+ * authorizes -- see that class for the OR composition and the
+ * closed-by-default rule.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+interface access_gate {
+    /**
+     * Whether an administrator has switched this method on. A gate that
+     * is not enabled is never consulted, regardless of the request.
+     *
+     * @return bool
+     */
+    public function is_enabled(): bool;
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->component = 'tool_openapi';
-$plugin->version = 2026081101;
-$plugin->requires = 2024100700; // Moodle 4.5+.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0';
-$plugin->supported = [405, 502]; // Moodle 4.5 to 5.2.
+    /**
+     * Decide whether this gate authorizes the current request.
+     *
+     * @param string|null $requestedservice The ?service= query param, if any.
+     * @return scope|null Null if this gate does not authorize the request.
+     */
+    public function authorize(?string $requestedservice): ?scope;
+}

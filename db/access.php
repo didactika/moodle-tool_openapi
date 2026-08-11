@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for tool_openapi
+ * Capability definitions for tool_openapi
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -25,9 +25,27 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'tool_openapi';
-$plugin->version = 2026081101;
-$plugin->requires = 2024100700; // Moodle 4.5+.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0';
-$plugin->supported = [405, 502]; // Moodle 4.5 to 5.2.
+$capabilities = [
+    'tool/openapi:view' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'tool/openapi:manage' => [
+        'riskbitmask' => RISK_CONFIG,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'tool/openapi:viewfullcatalog' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+];

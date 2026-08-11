@@ -26,4 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
+$string['openapi:manage'] = 'Manage OpenAPI documentation settings, tokens and IP rules';
+$string['openapi:view'] = 'View the OpenAPI documentation';
+$string['openapi:viewfullcatalog'] = 'View the full webservice catalog with a Moodle session';
 $string['pluginname'] = 'OpenAPI documentation';
