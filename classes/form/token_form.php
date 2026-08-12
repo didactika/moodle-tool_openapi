@@ -16,6 +16,8 @@
 
 namespace tool_openapi\form;
 
+use tool_openapi\local\service_functions;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
@@ -24,7 +26,7 @@ require_once($CFG->libdir . '/formslib.php');
  * Form for creating a new tool_openapi_tokens row.
  *
  * Tokens are never edited once created -- only revoked (see
- * pages/revoke_token.php) -- so this form only ever runs in create mode,
+ * pages/tokens/revoke.php) -- so this form only ever runs in create mode,
  * unlike ip_rule_form which also handles editing an existing row.
  *
  * @package    tool_openapi
@@ -43,15 +45,38 @@ class token_form extends \moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required');
 
+        $mform->addElement('advcheckbox', 'restrictfunctions', get_string('restrictfunctions', 'tool_openapi'), '', null, [0, 1]);
+        $mform->setDefault('restrictfunctions', 0);
+        $mform->addHelpButton('restrictfunctions', 'restrictfunctions', 'tool_openapi');
+
         $mform->addElement(
-            'textarea',
+            'autocomplete',
             'allowedfunctions',
             get_string('allowedfunctions', 'tool_openapi'),
-            ['rows' => 6, 'cols' => 60]
+            service_functions::all(),
+            ['multiple' => true, 'tags' => false]
         );
         $mform->setType('allowedfunctions', PARAM_RAW_TRIMMED);
-        $mform->addElement('static', 'allowedfunctions_desc', '', get_string('allowedfunctions_desc', 'tool_openapi'));
+        $mform->addHelpButton('allowedfunctions', 'allowedfunctions', 'tool_openapi');
+        $mform->hideIf('allowedfunctions', 'restrictfunctions', 'notchecked');
 
         $this->add_action_buttons(true, get_string('createtoken', 'tool_openapi'));
+    }
+
+    /**
+     * Validation.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if (!empty($data['restrictfunctions']) && empty($data['allowedfunctions'])) {
+            $errors['allowedfunctions'] = get_string('emptyallowedfunctions', 'tool_openapi');
+        }
+
+        return $errors;
     }
 }

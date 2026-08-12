@@ -27,7 +27,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
@@ -37,12 +37,12 @@ $id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_INT);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/revoke_token.php', ['id' => $id]));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', ['id' => $id]));
 $PAGE->set_title(get_string('revoke', 'tool_openapi'));
 $PAGE->set_heading(get_string('revoke', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
 
-$tokensurl = new moodle_url('/admin/tool/openapi/pages/tokens.php');
+$tokensurl = new moodle_url('/admin/tool/openapi/pages/tokens/index.php');
 
 $token = $DB->get_record('tool_openapi_tokens', ['id' => $id], '*', IGNORE_MISSING);
 if (!$token) {
@@ -57,7 +57,7 @@ if ($confirm && confirm_sesskey()) {
 
 echo $OUTPUT->header();
 
-$confirmurl = new moodle_url('/admin/tool/openapi/pages/revoke_token.php', [
+$confirmurl = new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', [
     'id' => $id,
     'confirm' => 1,
     'sesskey' => sesskey(),

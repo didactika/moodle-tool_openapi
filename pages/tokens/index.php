@@ -28,14 +28,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
 require_capability('tool/openapi:manage', $context);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens.php'));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens/index.php'));
 $PAGE->set_title(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_heading(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
@@ -44,14 +44,15 @@ $PAGE->requires->js_call_amd('tool_openapi/copy_to_clipboard', 'init');
 $form = new \tool_openapi\form\token_form();
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/admin/tool/openapi/pages/tokens.php'));
+    redirect(new moodle_url('/admin/tool/openapi/pages/tokens/index.php'));
 } else if ($data = $form->get_data()) {
     $plaintext = random_string(32);
+    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
 
     $id = $DB->insert_record('tool_openapi_tokens', (object) [
         'name' => $data->name,
         'tokenhash' => hash('sha256', $plaintext),
-        'allowedfunctions' => trim($data->allowedfunctions) === '' ? null : $data->allowedfunctions,
+        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
         'createdby' => $USER->id,
         'timecreated' => time(),
         'lastused' => null,
@@ -60,7 +61,7 @@ if ($form->is_cancelled()) {
 
     \cache::make('tool_openapi', 'newtoken')->set($id, $plaintext);
 
-    redirect(new moodle_url('/admin/tool/openapi/pages/tokens.php', ['newtoken' => $id]));
+    redirect(new moodle_url('/admin/tool/openapi/pages/tokens/index.php', ['newtoken' => $id]));
 }
 
 $newtokenid = optional_param('newtoken', 0, PARAM_INT);
@@ -75,6 +76,7 @@ if ($newtokenid) {
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_tokens'));
 
 if ($newtokenvalue !== null) {
     echo html_writer::start_div('alert alert-success');
@@ -125,7 +127,7 @@ if ($tokens) {
 
         $actions = '';
         if (!$token->revoked) {
-            $revokeurl = new moodle_url('/admin/tool/openapi/pages/revoke_token.php', ['id' => $token->id]);
+            $revokeurl = new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', ['id' => $token->id]);
             $actions = html_writer::link(
                 $revokeurl,
                 get_string('revoke', 'tool_openapi'),

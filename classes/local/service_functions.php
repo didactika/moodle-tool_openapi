@@ -68,4 +68,23 @@ final class service_functions {
             [$serviceid]
         );
     }
+
+    /**
+     * Every registered external function's name, for a search-select field.
+     *
+     * The site-wide registry (external_functions.name), not any one
+     * service's subset -- a token or IP rule's own allowed-functions list
+     * is independent of which external service (if any) a function also
+     * belongs to.
+     *
+     * @return string[] Function name => function name, alphabetically sorted.
+     */
+    public static function all(): array {
+        global $DB;
+
+        $names = $DB->get_fieldset_select('external_functions', 'name', '');
+        sort($names);
+
+        return array_combine($names, $names);
+    }
 }

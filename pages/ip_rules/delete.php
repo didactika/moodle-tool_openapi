@@ -27,7 +27,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
@@ -37,12 +37,12 @@ $id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_INT);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/delete_ip_rule.php', ['id' => $id]));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/delete.php', ['id' => $id]));
 $PAGE->set_title(get_string('delete'));
 $PAGE->set_heading(get_string('delete'));
 $PAGE->set_pagelayout('admin');
 
-$rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules.php');
+$rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php');
 
 $rule = $DB->get_record('tool_openapi_ip_rules', ['id' => $id], '*', IGNORE_MISSING);
 if (!$rule) {
@@ -57,7 +57,7 @@ if ($confirm && confirm_sesskey()) {
 
 echo $OUTPUT->header();
 
-$confirmurl = new moodle_url('/admin/tool/openapi/pages/delete_ip_rule.php', [
+$confirmurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/delete.php', [
     'id' => $id,
     'confirm' => 1,
     'sesskey' => sesskey(),
