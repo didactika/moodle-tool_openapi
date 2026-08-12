@@ -32,11 +32,11 @@ final class access_control_page_test extends \advanced_testcase {
      * All 4 gates are listed, in the order access_checker tries them.
      */
     public function test_lists_every_gate(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
-        $data = (new page())->export_for_template($OUTPUT);
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
 
         $this->assertCount(4, $data['rows']);
         $this->assertSame(get_string('gatesession', 'tool_openapi'), $data['rows'][0]['name']);
@@ -51,30 +51,64 @@ final class access_control_page_test extends \advanced_testcase {
      * roles pages, so it deliberately has none.
      */
     public function test_only_configurable_gates_get_a_cog(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
-        $rows = (new page())->export_for_template($OUTPUT)['rows'];
+        $rows = (new page())->export_for_template($PAGE->get_renderer('core'))['rows'];
 
         $this->assertSame('', $rows[0]['configicon']);
         $this->assertStringContainsString('ip_rules', $rows[1]['configicon']);
-        $this->assertStringContainsString('tokens', $rows[2]['configicon']);
-        $this->assertStringContainsString('webservicetokens', $rows[3]['configicon']);
+        $this->assertStringContainsString('tool/openapi/pages/tokens', $rows[2]['configicon']);
+        // Moodle's own manage-tokens page, not the settings section that
+        // embeds it: the cog lands where the tokens actually are.
+        $this->assertStringContainsString('/admin/webservice/tokens.php', $rows[3]['configicon']);
+    }
+
+    /**
+     * The page names the one endpoint these methods govern, so an
+     * administrator can tell what a switch just opened.
+     */
+    public function test_page_names_the_endpoint_it_gates(): void {
+        global $CFG, $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertSame($CFG->wwwroot . '/admin/tool/openapi/openapi.php', $data['endpointurl']);
+        $this->assertStringContainsString('tool/openapi:manage', $data['endpointdesc']);
+    }
+
+    /**
+     * Each switch carries what the browser side needs to save it: which
+     * gate, where to post, and a sesskey.
+     */
+    public function test_switch_carries_its_data_attributes(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $toggle = (new page())->export_for_template($PAGE->get_renderer('core'))['rows'][0]['toggle'];
+
+        $this->assertStringContainsString('data-gate="enablesessiongate"', $toggle);
+        $this->assertStringContainsString('data-sesskey=', $toggle);
+        $this->assertStringContainsString('data-actionurl=', $toggle);
+        $this->assertStringContainsString('type="checkbox"', $toggle);
     }
 
     /**
      * A gate's switch reflects its stored config value.
      */
     public function test_switch_reflects_stored_config(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
         set_config('enablesessiongate', 1, 'tool_openapi');
         set_config('enableipgate', 0, 'tool_openapi');
 
-        $rows = (new page())->export_for_template($OUTPUT)['rows'];
+        $rows = (new page())->export_for_template($PAGE->get_renderer('core'))['rows'];
 
         $this->assertStringContainsString('checked', $rows[0]['toggle']);
         $this->assertStringNotContainsString('checked', $rows[1]['toggle']);

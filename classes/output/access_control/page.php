@@ -22,6 +22,15 @@ use renderer_base;
  * The access methods table: one row per gate, each with a switch and,
  * where the method has anything to configure, a cog linking to it.
  *
+ * The page also names the one endpoint these methods govern. Without it an
+ * administrator is left switching things on with no way to tell what they
+ * just opened, and the plugin's own pages -- which are governed by the
+ * manage capability, not by any of this -- are easy to mistake for what is
+ * being gated.
+ *
+ * The switches carry their state in data attributes rather than
+ * extraattributes, which core added later and 4.5 does not have.
+ *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
@@ -55,8 +64,10 @@ class page implements \renderable, \templatable {
                 'gatewstoken',
                 'gatewstoken_desc',
                 // Moodle's own token page: a reused webservice token is
-                // created and revoked there, never here.
-                new \moodle_url('/admin/settings.php', ['section' => 'webservicetokens']),
+                // created and revoked there, never here. The manage page
+                // itself, not the admin setting section that merely embeds
+                // it, so the cog lands where the tokens actually are.
+                new \moodle_url('/admin/webservice/tokens.php'),
             ],
         ];
     }
@@ -68,6 +79,8 @@ class page implements \renderable, \templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
+        global $CFG;
+
         $toggleurl = new \moodle_url('/admin/tool/openapi/pages/access_control/toggle.php');
 
         $rows = [];
@@ -104,6 +117,9 @@ class page implements \renderable, \templatable {
         return [
             'heading' => get_string('accesscontrolheading', 'tool_openapi'),
             'headingdesc' => get_string('accesscontrolheading_desc', 'tool_openapi'),
+            'endpointheading' => get_string('endpointheading', 'tool_openapi'),
+            'endpointdesc' => get_string('endpointheading_desc', 'tool_openapi', 'tool/openapi:manage'),
+            'endpointurl' => $CFG->wwwroot . '/admin/tool/openapi/openapi.php',
             'rows' => $rows,
         ];
     }

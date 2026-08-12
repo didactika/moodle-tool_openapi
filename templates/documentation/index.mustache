@@ -25,12 +25,13 @@
     * catalogheadingdesc - Sentence under that heading
     * cacheheading - Heading for the cache section
     * cacheheadingdesc - Sentence under that heading
-    * viewerlabel - Label for the viewer link
-    * viewerurl - Viewer URL, empty while the viewer does not exist yet
-    * viewerdisabledreason - Shown when viewerurl is empty
+    * viewerlabel / viewerurl / viewericon - The interactive viewer
     * jsonurl / jsonlabel - JSON download
     * yamlurl / yamllabel - YAML download
-    * purgeurl / purgelabel - Cache purge action
+    * downloadicon - Shared by both downloads
+    * purgeurl / purgelabel / purgeicon - Cache purge action
+
+    The icons arrive pre-rendered: see the renderable's docblock.
 
     Example context (json):
     {
@@ -39,39 +40,33 @@
         "cacheheading": "Cache",
         "cacheheadingdesc": "The full webservice catalog is cached.",
         "viewerlabel": "Open the interactive viewer",
-        "viewerurl": "",
-        "viewerdisabledreason": "The interactive viewer is not available yet.",
+        "viewerurl": "https://example.com/documentation/viewer.php",
+        "viewericon": "<i class=\"icon fa fa-eye\" aria-hidden=\"true\"></i>",
         "jsonurl": "https://example.com/download.php?format=json",
         "jsonlabel": "Download JSON",
         "yamlurl": "https://example.com/download.php?format=yaml",
         "yamllabel": "Download YAML",
+        "downloadicon": "<i class=\"icon fa fa-download\" aria-hidden=\"true\"></i>",
         "purgeurl": "https://example.com/purge_cache.php",
-        "purgelabel": "Purge OpenAPI catalog cache"
+        "purgelabel": "Purge OpenAPI catalog cache",
+        "purgeicon": "<i class=\"icon fa fa-refresh\" aria-hidden=\"true\"></i>"
     }
 }}
 <h3>{{catalogheading}}</h3>
 <p class="text-muted">{{catalogheadingdesc}}</p>
 
 <div class="mb-4">
-    {{#viewerurl}}
-        <a href="{{viewerurl}}" class="btn btn-primary mr-2">
-            {{#pix}}i/preview, core{{/pix}} {{viewerlabel}}
-        </a>
-    {{/viewerurl}}
-    {{^viewerurl}}
-        <button type="button" class="btn btn-primary mr-2" disabled title="{{viewerdisabledreason}}">
-            {{#pix}}i/preview, core{{/pix}} {{viewerlabel}}
-        </button>
-        <span class="text-muted small d-block mt-2">{{viewerdisabledreason}}</span>
-    {{/viewerurl}}
+    <a href="{{viewerurl}}" class="btn btn-primary">
+        {{{viewericon}}} {{viewerlabel}}
+    </a>
 </div>
 
 <div class="mb-4">
     <a href="{{jsonurl}}" class="btn btn-secondary mr-2">
-        {{#pix}}t/download, core{{/pix}} {{jsonlabel}}
+        {{{downloadicon}}} {{jsonlabel}}
     </a>
     <a href="{{yamlurl}}" class="btn btn-secondary">
-        {{#pix}}t/download, core{{/pix}} {{yamllabel}}
+        {{{downloadicon}}} {{yamllabel}}
     </a>
 </div>
 
@@ -80,6 +75,6 @@
 
 <div>
     <a href="{{purgeurl}}" class="btn btn-secondary">
-        {{#pix}}t/reload, core{{/pix}} {{purgelabel}}
+        {{{purgeicon}}} {{purgelabel}}
     </a>
 </div>

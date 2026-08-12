@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<libraries>
+  <library>
+    <location>thirdparty/swagger-ui</location>
+    <name>Swagger UI</name>
+    <description>Renders an OpenAPI document as browsable, executable documentation. Used by pages/documentation/viewer.php; only the browser bundle and its stylesheet are shipped, not the source map or the standalone preset.</description>
+    <version>5.32.13</version>
+    <license>Apache</license>
+    <licenseversion>2.0</licenseversion>
+    <repository>https://github.com/swagger-api/swagger-ui</repository>
+  </library>
+</libraries>

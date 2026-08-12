@@ -23,6 +23,9 @@
     Context variables required for this template:
     * heading - Section heading
     * headingdesc - Sentence under the heading
+    * endpointheading - Heading for the block naming what is gated
+    * endpointdesc - What these methods do and do not control
+    * endpointurl - The one URL they govern
     * rows - Array of gates, each with:
         * name - Method name
         * description - What the method does
@@ -33,6 +36,9 @@
     {
         "heading": "Access methods",
         "headingdesc": "Turn each way of authorizing a request on or off.",
+        "endpointheading": "What these methods control",
+        "endpointdesc": "They decide who may read the document at this address.",
+        "endpointurl": "https://example.com/admin/tool/openapi/openapi.php",
         "rows": [
             {
                 "name": "Moodle session",
@@ -43,6 +49,21 @@
         ]
     }
 }}
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title h5">{{endpointheading}}</h4>
+        <p class="text-muted">{{endpointdesc}}</p>
+        <div class="d-flex justify-content-start align-middle">
+            <code class="text-break pt-1" id="tool_openapi-endpoint">{{endpointurl}}</code>
+            <button class="btn btn-secondary btn-sm ml-2" data-action="copytoclipboard"
+                data-clipboard-target="#tool_openapi-endpoint"
+                data-clipboard-success-message="{{#str}}textcopiedtoclipboard{{/str}}">
+                {{#pix}}t/copy, core{{/pix}} {{#str}}copytoclipboard{{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+
 <h3>{{heading}}</h3>
 <p class="text-muted">{{headingdesc}}</p>
 
@@ -67,3 +88,5 @@
         {{/rows}}
     </tbody>
 </table>
+
+{{#js}}require(['core/copy_to_clipboard']);{{/js}}

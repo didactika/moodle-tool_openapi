@@ -20,3 +20,45 @@ its own $plugin->release line -- no need to reconcile entries across branches.
 -->
 
 ## [Unreleased]
+
+## [1.0.0]
+
+First release.
+
+### Added
+
+- An OpenAPI 3.1 document generated from the site's own `external_functions`
+  catalog, served from `admin/tool/openapi/openapi.php` as JSON or YAML, with
+  `?version=3.0` for consumers that cannot read 3.1 and `?service=` to narrow
+  it to one external service.
+- Four independent access methods, composed with OR and all off on a fresh
+  install: Moodle session, IP allowlist, tokens issued by this plugin, and
+  reuse of an existing Moodle webservice token. Each can be limited to a
+  chosen list of functions; a plugin token can also be limited by IP the way
+  a core webservice token can.
+- An admin area under Admin tools with an access control page (a switch and,
+  where there is something to configure, a cog per method) and a
+  documentation page (viewer, downloads, cache purge).
+- An interactive viewer built on a bundled Swagger UI, whose Try it out
+  sends requests to Moodle's real REST endpoint.
+- Operations grouped by plugin, and core's own functions grouped by
+  subsystem rather than collapsed into a single `moodle` group.
+- Tokens are hashed, shown once at creation, deleted outright rather than
+  flagged, and their creation and deletion are recorded in the site log.
+- A privacy provider: the issuing administrator is exported without the
+  token itself, and a deletion request detaches the token instead of
+  destroying a credential still in use.
+- Spanish, Portuguese, Italian and French translations.
+- An hourly scheduled task that rebuilds the cached catalog, so no request
+  pays the cost of building it.
+- A plugin icon.
+- Documentation under `docs/`: quick start, installation, one page per
+  feature, an endpoint reference, automation from a pipeline, troubleshooting
+  and development notes.
+
+### Changed
+
+- CI runs the test matrix on pull requests only. `CI complete` is the
+  required status check on the protected branches, so a push to one is always
+  an already-tested merge; `release.yml` still runs on push and decides
+  whether to tag a release.

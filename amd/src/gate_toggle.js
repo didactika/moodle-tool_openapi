@@ -53,10 +53,16 @@ const toggleGate = async(checkbox) => {
 
 /**
  * Initialise the gate-toggle switches.
+ *
+ * The switch is matched by its own data attribute alone, never by a
+ * Bootstrap class: core/toggle renders custom-control-input on Moodle 4.5
+ * and form-check-input on 5.x, so a class-based selector silently stops
+ * matching on half the versions this plugin supports -- and a switch that
+ * matches nothing looks like it works while saving nothing.
  */
 export const init = () => {
     document.addEventListener('change', (e) => {
-        const checkbox = e.target.closest('input.custom-control-input[data-gate]');
+        const checkbox = e.target.closest('input[type="checkbox"][data-gate]');
         if (checkbox) {
             toggleGate(checkbox);
         }

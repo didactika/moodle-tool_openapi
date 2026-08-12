@@ -1,0 +1,61 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/documentation/viewer
+
+    The interactive viewer. The container starts empty: the bundled Swagger
+    UI fills it once it has fetched the document, which is why the page also
+    loads tool_openapi/viewer.
+
+    The library is included with a plain script tag rather than through
+    $PAGE->requires->js(), which would route it through lib/javascript.php
+    and run an already-minified 1.5MB bundle through core_minify a second
+    time -- that produces truncated, unparseable output. Placed before the
+    container, and so ahead of the AMD call the footer emits, which is what
+    the module needs to find the global it defines.
+
+    Context variables required for this template:
+    * heading - Section heading
+    * headingdesc - Sentence under the heading
+    * tokenhint - Pre-rendered notification: what a reader needs before Try it out will work
+    * restwarning - Pre-rendered notification, empty unless the REST protocol is off
+    * backurl / backlabel - The way back to the documentation page
+    * libraryurl - The bundled Swagger UI script
+    * elementid - Id of the container Swagger UI renders into
+
+    Example context (json):
+    {
+        "heading": "Interactive viewer",
+        "headingdesc": "Browse every function this site exposes.",
+        "tokenhint": "<div class=\"alert alert-info\">Paste a token into the wstoken field.</div>",
+        "restwarning": "",
+        "backurl": "https://example.com/documentation/index.php",
+        "backlabel": "Back to documentation",
+        "libraryurl": "https://example.com/thirdparty/swagger-ui/swagger-ui-bundle.js",
+        "elementid": "tool_openapi-viewer"
+    }
+}}
+{{> tool_openapi/local/back_link}}
+
+<h3>{{heading}}</h3>
+<p class="text-muted">{{headingdesc}}</p>
+
+{{{restwarning}}}
+{{{tokenhint}}}
+
+<script src="{{libraryurl}}"></script>
+<div id="{{elementid}}"></div>

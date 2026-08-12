@@ -1,10 +1,21 @@
-# Non-English language packs are managed by Moodle's own translation system
-# (AMOS, https://lang.moodle.org/) once this plugin is registered in the
-# Moodle plugins directory, not by this repository. Keeping only lang/en/
-# here avoids this repo and AMOS fighting over the same files.
+# The plugin ships its own translations for the languages it was written
+# for, so a site in one of them is usable straight from the zip. Any other
+# language belongs to Moodle's translation system (AMOS,
+# https://lang.moodle.org/) once this plugin is registered in the plugins
+# directory, and is not kept here. The two do not collide: a lang pack
+# installed into moodledata takes precedence over a plugin's own files, so
+# an AMOS translation supersedes the copy below rather than fighting it.
 lang/*
 !lang/en/
 !lang/en/**
+!lang/es/
+!lang/es/**
+!lang/fr/
+!lang/fr/**
+!lang/it/
+!lang/it/**
+!lang/pt/
+!lang/pt/**
 
 # Local moodle-plugin-ci runs (composer create-project ... ci ^4, per
 # ci.yml's own "Initialise moodle-plugin-ci" step) and its Composer

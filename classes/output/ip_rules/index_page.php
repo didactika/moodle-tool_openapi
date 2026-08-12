@@ -66,6 +66,8 @@ class index_page implements \renderable, \templatable {
 
         return [
             'heading' => get_string('manageiprules', 'tool_openapi'),
+            'backurl' => (new \moodle_url('/admin/tool/openapi/pages/access_control/index.php'))->out(false),
+            'backlabel' => get_string('backtoaccesscontrol', 'tool_openapi'),
             'createurl' => (new \moodle_url('/admin/tool/openapi/pages/ip_rules/create.php'))->out(false),
             'createlabel' => get_string('addiprule', 'tool_openapi'),
             'hasrules' => $rows !== [],
