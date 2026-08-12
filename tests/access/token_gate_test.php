@@ -43,14 +43,12 @@ final class token_gate_test extends \advanced_testcase {
      *
      * @param string $plaintext
      * @param string|null $allowedfunctions
-     * @param int $revoked
      * @param string|null $iprestriction
      * @return int
      */
     private function create_token(
         string $plaintext,
         ?string $allowedfunctions = null,
-        int $revoked = 0,
         ?string $iprestriction = null
     ): int {
         global $DB;
@@ -63,7 +61,6 @@ final class token_gate_test extends \advanced_testcase {
             'createdby' => get_admin()->id,
             'timecreated' => time(),
             'lastused' => null,
-            'revoked' => $revoked,
         ]);
     }
 
@@ -97,8 +94,8 @@ final class token_gate_test extends \advanced_testcase {
     }
 
     /**
-     * A known, non-revoked token with no restriction grants the full
-     * catalog, and updates lastused.
+     * A known token with no restriction grants the full catalog, and
+     * updates lastused.
      */
     public function test_valid_token_grants_full_catalog_and_updates_lastused(): void {
         global $DB;
@@ -133,7 +130,7 @@ final class token_gate_test extends \advanced_testcase {
      */
     public function test_token_with_matching_iprestriction_authorizes(): void {
         $this->resetAfterTest();
-        $this->create_token('sometoken123', null, 0, '192.0.2.0/24');
+        $this->create_token('sometoken123', null, '192.0.2.0/24');
         $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer sometoken123';
         $_SERVER['REMOTE_ADDR'] = '192.0.2.5';
 
@@ -146,7 +143,7 @@ final class token_gate_test extends \advanced_testcase {
      */
     public function test_token_with_non_matching_iprestriction_does_not_authorize(): void {
         $this->resetAfterTest();
-        $this->create_token('sometoken123', null, 0, '192.0.2.0/24');
+        $this->create_token('sometoken123', null, '192.0.2.0/24');
         $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer sometoken123';
         $_SERVER['REMOTE_ADDR'] = '203.0.113.1';
 
@@ -154,12 +151,19 @@ final class token_gate_test extends \advanced_testcase {
     }
 
     /**
-     * A revoked token does not authorize, even with the right value.
+     * A deleted token stops authorizing: there is no revoked flag any more,
+     * the row is simply gone.
      */
-    public function test_revoked_token_does_not_authorize(): void {
+    public function test_deleted_token_does_not_authorize(): void {
+        global $DB;
+
         $this->resetAfterTest();
-        $this->create_token('sometoken123', null, 1);
+        $id = $this->create_token('sometoken123');
         $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer sometoken123';
+
+        $this->assertNotNull((new token_gate())->authorize(null));
+
+        $DB->delete_records('tool_openapi_tokens', ['id' => $id]);
 
         $this->assertNull((new token_gate())->authorize(null));
     }

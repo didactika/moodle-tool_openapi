@@ -19,12 +19,13 @@ namespace tool_openapi\local;
 /**
  * The tab bar shared by every admin page of this plugin.
  *
- * One tabtree definition, reused by settings.php (embedded via
- * admin_setting_description, the same raw-HTML mechanism already used for
- * the cache purge button) and by the three plain pages/*.php screens
- * (echoed directly after $OUTPUT->header()), so the four pages of the
- * plugin always agree on what the other three are called and where they
- * live.
+ * Two tabs, matching the two things an administrator does here: decide who
+ * may read the catalog (access control), and get at the catalog itself
+ * (documentation). Tokens and IP rules are not tabs of their own -- they
+ * configure one access method each and are reached from that method's row
+ * in pages/access_control, so they render this same bar with the access
+ * control tab still selected rather than dropping the user somewhere with
+ * no visible context.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -32,34 +33,29 @@ namespace tool_openapi\local;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class settings_nav {
+    /** Tab id for the access control page, and for its sub-pages. */
+    public const TAB_ACCESS = 'tool_openapi_access';
+
+    /** Tab id for the documentation page. */
+    public const TAB_DOCS = 'tool_openapi_docs';
+
     /**
      * Builds the tab bar, marking one tab as the current page.
      *
-     * @param string $selected One of tool_openapi_settings, tool_openapi_access_control,
-     *                          tool_openapi_tokens, tool_openapi_ip_rules.
+     * @param string $selected One of the TAB_* constants.
      * @return \tabtree
      */
     public static function tabtree(string $selected): \tabtree {
         $tabs = [
             new \tabobject(
-                'tool_openapi_settings',
-                new \moodle_url('/admin/settings.php', ['section' => 'tool_openapi']),
-                get_string('cacheheading', 'tool_openapi')
-            ),
-            new \tabobject(
-                'tool_openapi_access_control',
+                self::TAB_ACCESS,
                 new \moodle_url('/admin/tool/openapi/pages/access_control/index.php'),
                 get_string('manageaccesscontrol', 'tool_openapi')
             ),
             new \tabobject(
-                'tool_openapi_tokens',
-                new \moodle_url('/admin/tool/openapi/pages/tokens/index.php'),
-                get_string('managetokens', 'tool_openapi')
-            ),
-            new \tabobject(
-                'tool_openapi_ip_rules',
-                new \moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'),
-                get_string('manageiprules', 'tool_openapi')
+                self::TAB_DOCS,
+                new \moodle_url('/admin/tool/openapi/pages/documentation/index.php'),
+                get_string('managedocumentation', 'tool_openapi')
             ),
         ];
 

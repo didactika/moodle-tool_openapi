@@ -1,0 +1,85 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/documentation/index
+
+    The catalog itself: open the viewer, download the document, purge the
+    cached copy.
+
+    Context variables required for this template:
+    * catalogheading - Heading for the catalog section
+    * catalogheadingdesc - Sentence under that heading
+    * cacheheading - Heading for the cache section
+    * cacheheadingdesc - Sentence under that heading
+    * viewerlabel - Label for the viewer link
+    * viewerurl - Viewer URL, empty while the viewer does not exist yet
+    * viewerdisabledreason - Shown when viewerurl is empty
+    * jsonurl / jsonlabel - JSON download
+    * yamlurl / yamllabel - YAML download
+    * purgeurl / purgelabel - Cache purge action
+
+    Example context (json):
+    {
+        "catalogheading": "Catalog",
+        "catalogheadingdesc": "Download the generated OpenAPI document.",
+        "cacheheading": "Cache",
+        "cacheheadingdesc": "The full webservice catalog is cached.",
+        "viewerlabel": "Open the interactive viewer",
+        "viewerurl": "",
+        "viewerdisabledreason": "The interactive viewer is not available yet.",
+        "jsonurl": "https://example.com/download.php?format=json",
+        "jsonlabel": "Download JSON",
+        "yamlurl": "https://example.com/download.php?format=yaml",
+        "yamllabel": "Download YAML",
+        "purgeurl": "https://example.com/purge_cache.php",
+        "purgelabel": "Purge OpenAPI catalog cache"
+    }
+}}
+<h3>{{catalogheading}}</h3>
+<p class="text-muted">{{catalogheadingdesc}}</p>
+
+<div class="mb-4">
+    {{#viewerurl}}
+        <a href="{{viewerurl}}" class="btn btn-primary mr-2">
+            {{#pix}}i/preview, core{{/pix}} {{viewerlabel}}
+        </a>
+    {{/viewerurl}}
+    {{^viewerurl}}
+        <button type="button" class="btn btn-primary mr-2" disabled title="{{viewerdisabledreason}}">
+            {{#pix}}i/preview, core{{/pix}} {{viewerlabel}}
+        </button>
+        <span class="text-muted small d-block mt-2">{{viewerdisabledreason}}</span>
+    {{/viewerurl}}
+</div>
+
+<div class="mb-4">
+    <a href="{{jsonurl}}" class="btn btn-secondary mr-2">
+        {{#pix}}t/download, core{{/pix}} {{jsonlabel}}
+    </a>
+    <a href="{{yamlurl}}" class="btn btn-secondary">
+        {{#pix}}t/download, core{{/pix}} {{yamllabel}}
+    </a>
+</div>
+
+<h3>{{cacheheading}}</h3>
+<p class="text-muted">{{cacheheadingdesc}}</p>
+
+<div>
+    <a href="{{purgeurl}}" class="btn btn-secondary">
+        {{#pix}}t/reload, core{{/pix}} {{purgelabel}}
+    </a>
+</div>

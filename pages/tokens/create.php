@@ -17,8 +17,11 @@
 /**
  * Creates a new tool_openapi_tokens row.
  *
- * Split out of tokens/index.php so that page can stay a plain list --
- * same create-here, list-there split as pages/ip_rules/create.php.
+ * Registered under the tokens section rather than one of its own, then
+ * re-pointed at this script with an extra breadcrumb entry -- the same
+ * thing core's admin/tool/filetypes/edit.php does, so the page keeps the
+ * site name as its heading and reads as "... / Tokens / Create token"
+ * instead of losing its place in the admin tree.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -27,18 +30,16 @@
  */
 
 require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
-$context = context_system::instance();
-require_capability('tool/openapi:manage', $context);
+admin_externalpage_setup('tool_openapi_tokens');
 
+$pagetitle = get_string('createtoken', 'tool_openapi');
 $tokensurl = new moodle_url('/admin/tool/openapi/pages/tokens/index.php');
 
-$PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens/create.php'));
-$PAGE->set_title(get_string('createtoken', 'tool_openapi'));
-$PAGE->set_heading(get_string('createtoken', 'tool_openapi'));
-$PAGE->set_pagelayout('admin');
+$PAGE->navbar->add($pagetitle);
+$PAGE->set_title($pagetitle);
 
 $form = new \tool_openapi\form\token_form();
 
@@ -46,24 +47,36 @@ if ($form->is_cancelled()) {
     redirect($tokensurl);
 } else if ($data = $form->get_data()) {
     $plaintext = random_string(32);
-    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
+    $restrictfunctions = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
+    $restrictip = !empty($data->restrictip) && trim($data->iprestriction) !== '';
 
     $id = $DB->insert_record('tool_openapi_tokens', (object) [
         'name' => $data->name,
         'tokenhash' => hash('sha256', $plaintext),
-        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
-        'iprestriction' => trim($data->iprestriction) === '' ? null : $data->iprestriction,
+        'allowedfunctions' => $restrictfunctions ? implode("\n", $data->allowedfunctions) : null,
+        'iprestriction' => $restrictip ? $data->iprestriction : null,
         'createdby' => $USER->id,
         'timecreated' => time(),
         'lastused' => null,
-        'revoked' => 0,
     ]);
 
+    \tool_openapi\event\token_created::create([
+        'objectid' => $id,
+        'context' => \context_system::instance(),
+        'other' => ['name' => $data->name],
+    ])->trigger();
+
+    // The plaintext never touches the database, only this session-scoped
+    // cache, so index.php can show it exactly once and then drop it. Just
+    // the secret, nothing else: that cache is declared simpledata, which
+    // means scalars only, and the token's name is already on the row
+    // index.php is about to load anyway.
     \cache::make('tool_openapi', 'newtoken')->set($id, $plaintext);
 
     redirect(new moodle_url('/admin/tool/openapi/pages/tokens/index.php', ['newtoken' => $id]));
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading($pagetitle);
 $form->display();
 echo $OUTPUT->footer();

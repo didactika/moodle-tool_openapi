@@ -1,0 +1,69 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/access_control/index
+
+    The access methods table: one row per gate, with an on/off switch and,
+    where the method has its own configuration, a cog linking to it.
+
+    Context variables required for this template:
+    * heading - Section heading
+    * headingdesc - Sentence under the heading
+    * rows - Array of gates, each with:
+        * name - Method name
+        * description - What the method does
+        * toggle - Pre-rendered core/toggle switch
+        * configicon - Pre-rendered cog link, or empty for methods with nothing to configure
+
+    Example context (json):
+    {
+        "heading": "Access methods",
+        "headingdesc": "Turn each way of authorizing a request on or off.",
+        "rows": [
+            {
+                "name": "Moodle session",
+                "description": "A logged-in user with the right capability can view the catalog.",
+                "toggle": "<div class=\"custom-control custom-switch\"></div>",
+                "configicon": ""
+            }
+        ]
+    }
+}}
+<h3>{{heading}}</h3>
+<p class="text-muted">{{headingdesc}}</p>
+
+<table class="table table-hover">
+    <caption class="sr-only">{{heading}}</caption>
+    <thead class="sr-only">
+        <tr>
+            <th scope="col">{{heading}}</th>
+            <th scope="col">{{#str}}description{{/str}}</th>
+            <th scope="col">{{#str}}settings{{/str}}</th>
+            <th scope="col">{{#str}}enable{{/str}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#rows}}
+            <tr>
+                <th scope="row" class="font-weight-bold align-middle">{{name}}</th>
+                <td class="align-middle text-muted">{{description}}</td>
+                <td class="align-middle text-right" style="width: 3rem;">{{{configicon}}}</td>
+                <td class="align-middle text-right" style="width: 4rem;">{{{toggle}}}</td>
+            </tr>
+        {{/rows}}
+    </tbody>
+</table>

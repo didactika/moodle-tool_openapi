@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/openapi/db" VERSION="2026081201" COMMENT="XMLDB file for tool_openapi">
+<XMLDB PATH="admin/tool/openapi/db" VERSION="2026081202" COMMENT="XMLDB file for tool_openapi">
   <TABLES>
     <TABLE NAME="tool_openapi_tokens" COMMENT="Plugin-issued tokens, for reading the documentation only">
       <FIELDS>
@@ -11,7 +11,6 @@
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Personal data, covered by the privacy provider"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="false"/>
-        <FIELD NAME="revoked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -55,7 +55,7 @@ final class token_gate implements access_gate {
 
         $record = $DB->get_record(
             'tool_openapi_tokens',
-            ['tokenhash' => hash('sha256', $token), 'revoked' => 0],
+            ['tokenhash' => hash('sha256', $token)],
             '*',
             IGNORE_MISSING
         );

@@ -1,0 +1,89 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/ip_rules/index
+
+    The IP rule list, with the create button above it and an empty state in
+    place of the table when there are no rules.
+
+    Context variables required for this template:
+    * heading - Section heading
+    * createurl / createlabel - The create button
+    * hasrules - Whether there is at least one row
+    * rows - Rules, each with iprange, description, scope, status, actions
+    * emptymessage - Shown instead of the table when hasrules is false
+    * headers - Column headings: iprange, description, scope, status
+
+    Example context (json):
+    {
+        "heading": "IP rules",
+        "createurl": "https://example.com/create.php",
+        "createlabel": "Add IP rule",
+        "hasrules": true,
+        "emptymessage": "No IP rules yet.",
+        "headers": {
+            "iprange": "IP address or CIDR range",
+            "description": "Description",
+            "scope": "Allowed functions",
+            "status": "Status"
+        },
+        "rows": [
+            {
+                "iprange": "192.0.2.0/24",
+                "description": "Office",
+                "scope": "Full catalog",
+                "status": "Enabled",
+                "actions": "<a href=\"#\"></a>"
+            }
+        ]
+    }
+}}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">{{heading}}</h3>
+    <a href="{{createurl}}" class="btn btn-primary">
+        {{#pix}}t/add, core{{/pix}} {{createlabel}}
+    </a>
+</div>
+
+{{#hasrules}}
+    <table class="table table-hover">
+        <caption class="sr-only">{{heading}}</caption>
+        <thead>
+            <tr>
+                <th scope="col">{{headers.iprange}}</th>
+                <th scope="col">{{headers.description}}</th>
+                <th scope="col">{{headers.scope}}</th>
+                <th scope="col">{{headers.status}}</th>
+                <th scope="col"><span class="sr-only">{{#str}}actions{{/str}}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+                <tr>
+                    <th scope="row" class="font-weight-bold">{{iprange}}</th>
+                    <td>{{description}}</td>
+                    <td>{{scope}}</td>
+                    <td>{{status}}</td>
+                    <td class="text-right">{{{actions}}}</td>
+                </tr>
+            {{/rows}}
+        </tbody>
+    </table>
+{{/hasrules}}
+{{^hasrules}}
+    {{> tool_openapi/local/empty_state}}
+{{/hasrules}}

@@ -45,5 +45,22 @@ function xmldb_tool_openapi_upgrade(int $oldversion): bool {
         upgrade_plugin_savepoint(true, 2026081201, 'tool', 'openapi');
     }
 
+    if ($oldversion < 2026081202) {
+        // Tokens are deleted outright now rather than flagged, so that a
+        // token an administrator removed cannot linger in the table -- the
+        // same thing core does for its own webservice tokens. What used to
+        // be the audit value of keeping the row is served properly by the
+        // token_created/token_deleted events instead.
+        $table = new xmldb_table('tool_openapi_tokens');
+        $field = new xmldb_field('revoked');
+
+        if ($dbman->field_exists($table, $field)) {
+            $DB->delete_records('tool_openapi_tokens', ['revoked' => 1]);
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081202, 'tool', 'openapi');
+    }
+
     return true;
 }
