@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'tool_openapi';
-$plugin->version = 2026081201;
+$plugin->version = 2026081202;
 $plugin->requires = 2024100700; // Moodle 4.5+.
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->release = '0.1.0';

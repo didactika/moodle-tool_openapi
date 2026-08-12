@@ -15,26 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings for tool_openapi
+ * Admin tree registration for tool_openapi
  *
- * The only entry this plugin registers in $ADMIN at all -- access
- * control/tokens/IP rules are real pages (each with its own
- * require_login()/require_capability(), same as this one), but they are
- * reachable only via the shared tab bar (classes/local/settings_nav.php),
- * not from the admin tree. An admin_category grouping all 4 was tried and
- * reverted: clicking a category in Admin tools lands on Moodle's generic
- * "pick a page" listing instead of anywhere useful, and there is no core
- * hook to redirect a category to one of its children. This way "OpenAPI
- * documentation" in Admin tools goes straight to the first tab, no
- * intermediate landing page.
+ * Every page of this plugin is registered here, and that registration is
+ * load-bearing rather than cosmetic: admin_externalpage_setup() refuses to
+ * run for a section that is not in the tree (it throws 'sectionerror'), and
+ * it is what gives each page its site-name heading, its title and its
+ * breadcrumb. Pages that skip it end up with no breadcrumb and their own
+ * heading where the site name should be.
  *
- * Deliberately minimal: a shared tab bar, then the cache purge action and
- * catalog download links. The access-method toggles (enablesessiongate
- * and friends) live on their own page, see pages/access_control/index.php
- * -- every gate is already closed by default via get_config() returning
- * falsy when unset, so nothing here is required for the access engine or
- * the endpoint to behave correctly, only for an administrator to turn a
- * method on from the UI instead of by hand.
+ * Tokens and IP rules are registered hidden (the 5th admin_externalpage
+ * argument): they are reached from the cog on their access method in
+ * pages/access_control, not from the admin tree, but they still need to be
+ * locatable for admin_externalpage_setup() to work. Same approach core
+ * takes for its own webservice service pages, see admin/settings/server.php.
+ *
+ * There is no admin_settingpage: every gate is stored via set_config() from
+ * pages/access_control/toggle.php, so the plugin has no setting an
+ * administrator edits through a settings form.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -45,37 +43,35 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $settings = new admin_settingpage('tool_openapi', get_string('pluginname', 'tool_openapi'), 'tool/openapi:manage');
+    $ADMIN->add('tools', new admin_category('tool_openapi', get_string('pluginname', 'tool_openapi')));
 
-    if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_description(
-            'tool_openapi/tabs',
-            '',
-            $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_settings'))
-        ));
+    $ADMIN->add('tool_openapi', new admin_externalpage(
+        'tool_openapi_access',
+        get_string('manageaccesscontrol', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/access_control/index.php'),
+        'tool/openapi:manage'
+    ));
 
-        $settings->add(new admin_setting_heading(
-            'tool_openapi/cacheheading',
-            get_string('cacheheading', 'tool_openapi'),
-            get_string('cacheheading_desc', 'tool_openapi')
-        ));
+    $ADMIN->add('tool_openapi', new admin_externalpage(
+        'tool_openapi_docs',
+        get_string('managedocumentation', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/documentation/index.php'),
+        'tool/openapi:manage'
+    ));
 
-        $purgeurl = new moodle_url('/admin/tool/openapi/pages/purge_cache.php', ['sesskey' => sesskey()]);
-        $settings->add(new admin_setting_description(
-            'tool_openapi/purgecache',
-            get_string('purgecache', 'tool_openapi'),
-            \html_writer::link($purgeurl, get_string('purgecache', 'tool_openapi'), ['class' => 'btn btn-secondary'])
-        ));
+    $ADMIN->add('tool_openapi', new admin_externalpage(
+        'tool_openapi_tokens',
+        get_string('managetokens', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/tokens/index.php'),
+        'tool/openapi:manage',
+        true
+    ));
 
-        $downloadjsonurl = new moodle_url('/admin/tool/openapi/pages/download.php', ['format' => 'json']);
-        $downloadyamlurl = new moodle_url('/admin/tool/openapi/pages/download.php', ['format' => 'yaml']);
-        $settings->add(new admin_setting_description(
-            'tool_openapi/download',
-            '',
-            \html_writer::link($downloadjsonurl, get_string('downloadjson', 'tool_openapi'), ['class' => 'btn btn-secondary mr-2'])
-                . \html_writer::link($downloadyamlurl, get_string('downloadyaml', 'tool_openapi'), ['class' => 'btn btn-secondary'])
-        ));
-    }
-
-    $ADMIN->add('tools', $settings);
+    $ADMIN->add('tool_openapi', new admin_externalpage(
+        'tool_openapi_ip_rules',
+        get_string('manageiprules', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'),
+        'tool/openapi:manage',
+        true
+    ));
 }

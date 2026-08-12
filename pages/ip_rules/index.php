@@ -16,8 +16,7 @@
 
 /**
  * Lists tool_openapi_ip_rules rows. Creating one is ip_rules/create.php,
- * editing is ip_rules/edit.php, deleting is ip_rules/delete.php -- this
- * page only ever lists.
+ * editing is ip_rules/edit.php, deleting is ip_rules/delete.php.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -26,63 +25,14 @@
  */
 
 require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
-$context = context_system::instance();
-require_capability('tool/openapi:manage', $context);
-
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'));
-$PAGE->set_title(get_string('manageiprules', 'tool_openapi'));
-$PAGE->set_heading(get_string('manageiprules', 'tool_openapi'));
-$PAGE->set_pagelayout('admin');
-
-echo $OUTPUT->header();
-echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_ip_rules'));
-
-$createurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/create.php');
-echo html_writer::div(
-    html_writer::link($createurl, get_string('addiprule', 'tool_openapi'), ['class' => 'btn btn-primary']),
-    'd-flex justify-content-end mb-3'
-);
+admin_externalpage_setup('tool_openapi_ip_rules');
 
 $rules = $DB->get_records('tool_openapi_ip_rules', null, 'id ASC');
+$renderable = new \tool_openapi\output\ip_rules\index_page($rules);
 
-if ($rules) {
-    $table = new html_table();
-    $table->head = [
-        get_string('iprange', 'tool_openapi'),
-        get_string('ruledescription', 'tool_openapi'),
-        get_string('allowedfunctions', 'tool_openapi'),
-        get_string('status'),
-        '',
-    ];
-
-    foreach ($rules as $rule) {
-        $scope = $rule->allowedfunctions === null
-            ? get_string('fullcatalog', 'tool_openapi')
-            : implode(', ', array_filter(array_map('trim', explode("\n", $rule->allowedfunctions))));
-
-        $editurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/edit.php', ['id' => $rule->id]);
-        $deleteurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/delete.php', ['id' => $rule->id]);
-        $actions = html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-outline-secondary btn-sm mr-1'])
-            . html_writer::link($deleteurl, get_string('delete'), ['class' => 'btn btn-outline-danger btn-sm']);
-
-        $table->data[] = [
-            $rule->iprange,
-            $rule->description,
-            $scope,
-            $rule->enabled ? get_string('enabled', 'tool_openapi') : get_string('disabled', 'tool_openapi'),
-            $actions,
-        ];
-    }
-
-    echo html_writer::table($table);
-} else {
-    echo html_writer::div(
-        html_writer::tag('p', get_string('noiprules', 'tool_openapi'), ['class' => 'mb-0']),
-        'text-center text-muted py-5 border rounded'
-    );
-}
-
+echo $OUTPUT->header();
+echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree(\tool_openapi\local\settings_nav::TAB_ACCESS));
+echo $OUTPUT->render_from_template('tool_openapi/ip_rules/index', $renderable->export_for_template($OUTPUT));
 echo $OUTPUT->footer();

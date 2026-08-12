@@ -40,7 +40,8 @@ $definitions = [
         'staticacceleration' => true,
     ],
 
-    // Holds a freshly generated plugin token in plaintext, keyed by
+    // Holds a freshly generated plugin token's plaintext -- and nothing
+    // else, since simpledata means scalars only -- keyed by
     // tool_openapi_tokens.id, so pages/tokens/index.php can show it exactly once
     // after a Post/Redirect/Get -- same pattern local_servicemanager uses
     // for its own service tokens (db/caches.php's 'newtoken'). Session

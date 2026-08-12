@@ -1,0 +1,61 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/tokens/reveal
+
+    A newly created token, shown exactly once. Shaped after core's own
+    core_admin/webservice_token_new: the value sits in an inline block with
+    a small copy button beside it rather than stretched across the page.
+
+    The copy button carries no JS of its own -- core/copy_to_clipboard is a
+    delegated listener that picks up any element with
+    data-action="copytoclipboard" and copies whatever
+    data-clipboard-target points at.
+
+    Context variables required for this template:
+    * message - Warning that the token is shown only once
+    * tokenname - The token's label
+    * token - The token value in plaintext
+
+    Example context (json):
+    {
+        "message": "This token is shown only once.",
+        "tokenname": "Integration",
+        "token": "0123456789abcdef0123456789abcdef"
+    }
+}}
+<div class="d-inline-block">
+    <div class="alert alert-warning">
+        <div class="lead">{{message}}</div>
+    </div>
+    <div class="alert alert-primary">
+        <div class="lead">{{tokenname}}</div>
+        <div class="d-flex justify-content-start align-middle">
+            <div class="lead text-break pt-1" id="tool_openapi-newtoken">{{token}}</div>
+            <button class="btn btn-primary ml-2"
+                data-action="copytoclipboard"
+                data-clipboard-target="#tool_openapi-newtoken"
+                data-clipboard-success-message="{{#str}}textcopiedtoclipboard{{/str}}">
+                {{#pix}}t/copy, core{{/pix}} {{#str}}copytoclipboard{{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+
+{{#js}}
+    require(['core/copy_to_clipboard']);
+{{/js}}

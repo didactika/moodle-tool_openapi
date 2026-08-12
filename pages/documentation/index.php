@@ -15,11 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Purges the cached OpenAPI catalog document, then returns to settings.
- *
- * Not a self-invalidating cache in the usual sense -- see db/caches.php --
- * this is only the manual override for an administrator who does not want
- * to wait for the next scheduled regenerate_spec_task run.
+ * The generated catalog: view it, download it, purge its cached copy.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -27,17 +23,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
-require_capability('tool/openapi:manage', \context_system::instance());
-require_sesskey();
+admin_externalpage_setup('tool_openapi_docs');
 
-\tool_openapi\local\document_cache::purge();
+$renderable = new \tool_openapi\output\documentation\page();
 
-redirect(
-    new moodle_url('/admin/settings.php', ['section' => 'tool_openapi']),
-    get_string('cachepurged', 'tool_openapi'),
-    null,
-    \core\output\notification::NOTIFY_SUCCESS
-);
+echo $OUTPUT->header();
+echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree(\tool_openapi\local\settings_nav::TAB_DOCS));
+echo $OUTPUT->render_from_template('tool_openapi/documentation/index', $renderable->export_for_template($OUTPUT));
+echo $OUTPUT->footer();

@@ -24,20 +24,18 @@
  */
 
 require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
-$context = context_system::instance();
-require_capability('tool/openapi:manage', $context);
+admin_externalpage_setup('tool_openapi_ip_rules');
 
 $id = required_param('id', PARAM_INT);
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/edit.php', ['id' => $id]));
-$PAGE->set_title(get_string('editiprule', 'tool_openapi'));
-$PAGE->set_heading(get_string('editiprule', 'tool_openapi'));
-$PAGE->set_pagelayout('admin');
-
+$pagetitle = get_string('editiprule', 'tool_openapi');
 $rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php');
+
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/edit.php', ['id' => $id]));
+$PAGE->navbar->add($pagetitle);
+$PAGE->set_title($pagetitle);
 
 $rule = $DB->get_record('tool_openapi_ip_rules', ['id' => $id], '*', IGNORE_MISSING);
 if (!$rule) {
@@ -73,5 +71,6 @@ if ($form->is_cancelled()) {
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading($pagetitle);
 $form->display();
 echo $OUTPUT->footer();

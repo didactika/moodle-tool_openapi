@@ -16,13 +16,12 @@
 
 /**
  * Lists tool_openapi_tokens rows. Creating one is tokens/create.php,
- * revoking is tokens/revoke.php -- this page only ever lists and reveals.
+ * deleting is tokens/delete.php -- this page only lists and reveals.
  *
- * Tokens are shown in plaintext exactly once, right after creation --
- * same Post/Redirect/Get pattern local_servicemanager uses for its own
- * service tokens (db/caches.php's 'newtoken', session-scoped, TTL 300s).
- * Only the hash is ever stored or shown again after this one request --
- * create.php redirects here with ?newtoken=<id> to trigger the reveal.
+ * A token is shown in plaintext exactly once, right after creation:
+ * create.php stashes it in the session-scoped 'newtoken' cache
+ * (db/caches.php, TTL 300s) and redirects here with ?newtoken=<id>, so a
+ * refresh cannot show it again. Only the hash is ever stored.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -31,113 +30,35 @@
  */
 
 require(__DIR__ . '/../../../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-require_login();
-$context = context_system::instance();
-require_capability('tool/openapi:manage', $context);
+admin_externalpage_setup('tool_openapi_tokens');
 
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens/index.php'));
-$PAGE->set_title(get_string('managetokens', 'tool_openapi'));
-$PAGE->set_heading(get_string('managetokens', 'tool_openapi'));
-$PAGE->set_pagelayout('admin');
-$PAGE->requires->js_call_amd('tool_openapi/copy_to_clipboard', 'init');
+$tokens = $DB->get_records('tool_openapi_tokens', null, 'timecreated DESC');
 
 $newtokenid = optional_param('newtoken', 0, PARAM_INT);
-$newtokenvalue = null;
-if ($newtokenid) {
+$newtoken = null;
+if ($newtokenid && isset($tokens[$newtokenid])) {
     $tokencache = \cache::make('tool_openapi', 'newtoken');
     $cached = $tokencache->get($newtokenid);
     if ($cached !== false) {
-        $newtokenvalue = $cached;
+        $newtoken = $cached;
         $tokencache->delete($newtokenid);
     }
 }
 
+$renderable = new \tool_openapi\output\tokens\index_page($tokens);
+
 echo $OUTPUT->header();
-echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_tokens'));
+echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree(\tool_openapi\local\settings_nav::TAB_ACCESS));
 
-if ($newtokenvalue !== null) {
-    echo html_writer::start_div('alert alert-success');
-    echo html_writer::tag('p', get_string('tokencreatedonce', 'tool_openapi'));
-    echo html_writer::start_div('input-group');
-    echo html_writer::empty_tag('input', [
-        'type' => 'text',
-        'class' => 'form-control',
-        'value' => $newtokenvalue,
-        'readonly' => 'readonly',
+if ($newtoken !== null) {
+    echo $OUTPUT->render_from_template('tool_openapi/tokens/reveal', [
+        'message' => get_string('tokencreatedonce', 'tool_openapi'),
+        'tokenname' => $tokens[$newtokenid]->name,
+        'token' => $newtoken,
     ]);
-    echo html_writer::start_div('input-group-append');
-    echo html_writer::tag(
-        'button',
-        get_string('copytoken', 'tool_openapi'),
-        [
-            'type' => 'button',
-            'class' => 'btn btn-outline-secondary tool_openapi-copy-token',
-            'data-token' => $newtokenvalue,
-        ]
-    );
-    echo html_writer::end_div();
-    echo html_writer::end_div();
-    echo html_writer::end_div();
 }
 
-$createurl = new moodle_url('/admin/tool/openapi/pages/tokens/create.php');
-echo html_writer::div(
-    html_writer::link($createurl, get_string('createtoken', 'tool_openapi'), ['class' => 'btn btn-primary']),
-    'd-flex justify-content-end mb-3'
-);
-
-$tokens = $DB->get_records('tool_openapi_tokens', null, 'timecreated DESC');
-
-if ($tokens) {
-    $table = new html_table();
-    $table->head = [
-        get_string('tokenname', 'tool_openapi'),
-        get_string('allowedfunctions', 'tool_openapi'),
-        get_string('iprange', 'tool_openapi'),
-        get_string('created', 'tool_openapi'),
-        get_string('lastused', 'tool_openapi'),
-        get_string('status'),
-        '',
-    ];
-
-    foreach ($tokens as $token) {
-        $scope = $token->allowedfunctions === null
-            ? get_string('fullcatalog', 'tool_openapi')
-            : implode(', ', array_filter(array_map('trim', explode("\n", $token->allowedfunctions))));
-
-        $status = $token->revoked
-            ? get_string('revoked', 'tool_openapi')
-            : get_string('active', 'tool_openapi');
-
-        $actions = '';
-        if (!$token->revoked) {
-            $revokeurl = new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', ['id' => $token->id]);
-            $actions = html_writer::link(
-                $revokeurl,
-                get_string('revoke', 'tool_openapi'),
-                ['class' => 'btn btn-outline-danger btn-sm']
-            );
-        }
-
-        $table->data[] = [
-            $token->name,
-            $scope,
-            $token->iprestriction ?? get_string('noiprestriction', 'tool_openapi'),
-            userdate($token->timecreated),
-            $token->lastused ? userdate($token->lastused) : get_string('never', 'tool_openapi'),
-            $status,
-            $actions,
-        ];
-    }
-
-    echo html_writer::table($table);
-} else {
-    echo html_writer::div(
-        html_writer::tag('p', get_string('notokens', 'tool_openapi'), ['class' => 'mb-0']),
-        'text-center text-muted py-5 border rounded'
-    );
-}
-
+echo $OUTPUT->render_from_template('tool_openapi/tokens/index', $renderable->export_for_template($OUTPUT));
 echo $OUTPUT->footer();

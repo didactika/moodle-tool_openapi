@@ -1,0 +1,93 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_openapi/tokens/index
+
+    The plugin token list, with the create button above it and an empty
+    state in place of the table when there are no tokens.
+
+    Context variables required for this template:
+    * heading - Section heading
+    * createurl / createlabel - The create button
+    * hastokens - Whether there is at least one row
+    * rows - Tokens, each with name, scope, iprestriction, created, lastused, deleteicon
+    * emptymessage - Shown instead of the table when hastokens is false
+    * headers - Column headings: name, scope, iprestriction, created, lastused
+
+    Example context (json):
+    {
+        "heading": "Tokens",
+        "createurl": "https://example.com/create.php",
+        "createlabel": "Create token",
+        "hastokens": true,
+        "emptymessage": "No tokens yet.",
+        "headers": {
+            "name": "Name",
+            "scope": "Allowed functions",
+            "iprestriction": "IP address or CIDR range",
+            "created": "Created",
+            "lastused": "Last used"
+        },
+        "rows": [
+            {
+                "name": "Integration",
+                "scope": "Full catalog",
+                "iprestriction": "Any",
+                "created": "1 January 2026",
+                "lastused": "Never",
+                "deleteicon": "<a href=\"#\"></a>"
+            }
+        ]
+    }
+}}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">{{heading}}</h3>
+    <a href="{{createurl}}" class="btn btn-primary">
+        {{#pix}}t/add, core{{/pix}} {{createlabel}}
+    </a>
+</div>
+
+{{#hastokens}}
+    <table class="table table-hover">
+        <caption class="sr-only">{{heading}}</caption>
+        <thead>
+            <tr>
+                <th scope="col">{{headers.name}}</th>
+                <th scope="col">{{headers.scope}}</th>
+                <th scope="col">{{headers.iprestriction}}</th>
+                <th scope="col">{{headers.created}}</th>
+                <th scope="col">{{headers.lastused}}</th>
+                <th scope="col"><span class="sr-only">{{#str}}actions{{/str}}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+                <tr>
+                    <th scope="row" class="font-weight-bold">{{name}}</th>
+                    <td>{{scope}}</td>
+                    <td>{{iprestriction}}</td>
+                    <td>{{created}}</td>
+                    <td>{{lastused}}</td>
+                    <td class="text-right">{{{deleteicon}}}</td>
+                </tr>
+            {{/rows}}
+        </tbody>
+    </table>
+{{/hastokens}}
+{{^hastokens}}
+    {{> tool_openapi/local/empty_state}}
+{{/hastokens}}
