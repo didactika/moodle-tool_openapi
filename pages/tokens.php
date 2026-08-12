@@ -39,6 +39,7 @@ $PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens.php'));
 $PAGE->set_title(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_heading(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
+$PAGE->requires->js_call_amd('tool_openapi/copy_to_clipboard', 'init');
 
 $form = new \tool_openapi\form\token_form();
 
@@ -78,12 +79,25 @@ echo $OUTPUT->header();
 if ($newtokenvalue !== null) {
     echo html_writer::start_div('alert alert-success');
     echo html_writer::tag('p', get_string('tokencreatedonce', 'tool_openapi'));
+    echo html_writer::start_div('input-group');
     echo html_writer::empty_tag('input', [
         'type' => 'text',
         'class' => 'form-control',
         'value' => $newtokenvalue,
         'readonly' => 'readonly',
     ]);
+    echo html_writer::start_div('input-group-append');
+    echo html_writer::tag(
+        'button',
+        get_string('copytoken', 'tool_openapi'),
+        [
+            'type' => 'button',
+            'class' => 'btn btn-outline-secondary tool_openapi-copy-token',
+            'data-token' => $newtokenvalue,
+        ]
+    );
+    echo html_writer::end_div();
+    echo html_writer::end_div();
     echo html_writer::end_div();
 }
 
