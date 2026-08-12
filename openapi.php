@@ -42,20 +42,22 @@ define('NO_DEBUG_DISPLAY', true);
 require(__DIR__ . '/../../../config.php'); // phpcs:ignore moodle.Files.RequireLogin.Missing
 
 /**
- * Send a minimal JSON error body and stop.
+ * Emit a minimal JSON error body.
  *
  * Deliberately never says *why* a request was rejected -- see
- * 03-control-de-acceso.md.
+ * 03-control-de-acceso.md. Does not stop the script itself: every call
+ * site is immediately followed by its own exit, kept at the top level of
+ * this script rather than inside a reusable function -- a function whose
+ * whole point is to unconditionally terminate the request is not a unit
+ * worth separating from where that termination actually happens.
  *
  * @param int $httpstatus
  * @param string $error
- * @return never
  */
-function tool_openapi_send_error(int $httpstatus, string $error): never {
+function tool_openapi_send_error(int $httpstatus, string $error): void {
     http_response_code($httpstatus);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['error' => $error]);
-    die;
 }
 
 $service = optional_param('service', null, PARAM_ALPHANUMEXT);
@@ -64,14 +66,17 @@ $format = optional_param('format', 'json', PARAM_ALPHA);
 
 if (!in_array($version, ['3.1', '3.0'], true)) {
     tool_openapi_send_error(400, 'invalid_version');
+    exit;
 }
 if (!in_array($format, ['json', 'yaml'], true)) {
     tool_openapi_send_error(400, 'invalid_format');
+    exit;
 }
 
 $scope = \tool_openapi\access\access_checker::default()->authorize($service);
 if ($scope === null) {
     tool_openapi_send_error(403, 'access_denied');
+    exit;
 }
 
 $document = \tool_openapi\local\document_cache::get();
@@ -81,6 +86,7 @@ if ($service !== null) {
         $document = \tool_openapi\generator\service_filter::filter($document, $service);
     } catch (\moodle_exception) {
         tool_openapi_send_error(400, 'invalid_service');
+        exit;
     }
 }
 
