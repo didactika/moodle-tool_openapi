@@ -22,6 +22,12 @@ use renderer_base;
  * Everything to do with the generated catalog itself: view it, download it,
  * and force a rebuild of the cached copy.
  *
+ * Icons are rendered here rather than with {{#pix}} in the template, the
+ * same way the token, IP rule and access method lists render theirs: one
+ * place decides what an action looks like. Each is decorative -- the label
+ * beside it already names the action -- so each gets an empty alt, which is
+ * what marks it aria-hidden.
+ *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
@@ -49,10 +55,13 @@ class page implements \renderable, \templatable {
             'jsonlabel' => get_string('downloadjson', 'tool_openapi'),
             'yamlurl' => (new \moodle_url($downloadurl, ['format' => 'yaml']))->out(false),
             'yamllabel' => get_string('downloadyaml', 'tool_openapi'),
+            'downloadicon' => $output->pix_icon('t/download', ''),
             'purgeurl' => $purgeurl->out(false),
             'purgelabel' => get_string('purgecache', 'tool_openapi'),
+            'purgeicon' => $output->pix_icon('t/reload', ''),
             'viewerlabel' => get_string('viewer', 'tool_openapi'),
             'viewerurl' => (new \moodle_url('/admin/tool/openapi/pages/documentation/viewer.php'))->out(false),
+            'viewericon' => $output->pix_icon('i/preview', ''),
         ];
     }
 }

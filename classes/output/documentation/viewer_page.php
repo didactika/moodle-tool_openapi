@@ -27,6 +27,12 @@ use renderer_base;
  * switched off -- the gates decide who may read the catalog from outside,
  * not whether an administrator can look at it here.
  *
+ * The library URL is handed to the template so the page can load it with a
+ * plain script tag. It deliberately does not go through
+ * $PAGE->requires->js(): that routes every .js file through
+ * lib/javascript.php, which runs it through core_minify, and minifying an
+ * already-minified 1.5MB bundle produces truncated, unparseable output.
+ *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
@@ -50,14 +56,21 @@ class viewer_page implements \renderable, \templatable {
             'inline' => 1,
         ]);
 
+        $library = new \moodle_url('/admin/tool/openapi/thirdparty/swagger-ui/swagger-ui-bundle.js');
+
         return [
             'heading' => get_string('viewerheading', 'tool_openapi'),
             'headingdesc' => get_string('viewerheading_desc', 'tool_openapi'),
-            'tokenhint' => get_string('viewertokenhint', 'tool_openapi'),
+            'tokenhint' => $output->notification(
+                get_string('viewertokenhint', 'tool_openapi'),
+                \core\output\notification::NOTIFY_INFO,
+                false
+            ),
             'backurl' => (new \moodle_url('/admin/tool/openapi/pages/documentation/index.php'))->out(false),
             'backlabel' => get_string('backtodocumentation', 'tool_openapi'),
             'elementid' => self::ELEMENT_ID,
             'specurl' => $specurl->out(false),
+            'libraryurl' => $library->out(false),
             'endpoint' => $CFG->wwwroot . '/webservice/rest/server.php',
         ];
     }

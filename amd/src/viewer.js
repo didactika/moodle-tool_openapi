@@ -36,13 +36,25 @@
  * already carries wsfunction, wstoken and moodlewsrestformat -- is kept as
  * the operation built it.
  *
+ * Only operations are retargeted. Swagger UI puts the fetch of the document
+ * itself through this same interceptor, and that one is already pointed at
+ * the page that serves it; wsfunction is what tells the two apart, since
+ * every operation declares it as a required parameter and nothing else has
+ * it.
+ *
  * @param {String} endpoint Absolute URL of Moodle's REST server
  * @param {Object} request The request Swagger UI is about to send
- * @returns {Object} The same request, retargeted
+ * @returns {Object} The same request, retargeted if it is an operation
  */
 const retarget = (endpoint, request) => {
+    // Same-origin credentials: the document is served by an admin-only page,
+    // so the fetch has to carry the session cookie.
+    request.credentials = 'same-origin';
+
     const query = request.url.indexOf('?');
-    request.url = endpoint + (query === -1 ? '' : request.url.substring(query));
+    if (query !== -1 && request.url.indexOf('wsfunction=') !== -1) {
+        request.url = endpoint + request.url.substring(query);
+    }
 
     return request;
 };
@@ -70,6 +82,7 @@ export const init = (specUrl, endpoint, elementId) => {
         docExpansion: 'none',
         defaultModelsExpandDepth: 0,
         tryItOutEnabled: true,
+        withCredentials: true,
         requestInterceptor: (request) => retarget(endpoint, request),
     });
 };

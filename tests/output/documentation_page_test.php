@@ -87,4 +87,38 @@ final class documentation_page_test extends \advanced_testcase {
         $this->assertSame($CFG->wwwroot . '/webservice/rest/server.php', $data['endpoint']);
         $this->assertSame(viewer_page::ELEMENT_ID, $data['elementid']);
     }
+
+    /**
+     * The viewer points at the bundled library directly.
+     *
+     * Not through $PAGE->requires->js(), which routes .js files through
+     * lib/javascript.php and minifies an already-minified bundle into
+     * something the browser cannot parse.
+     */
+    public function test_viewer_page_links_the_bundled_library(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new viewer_page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertStringContainsString('thirdparty/swagger-ui/swagger-ui-bundle.js', $data['libraryurl']);
+        $this->assertStringNotContainsString('javascript.php', $data['libraryurl']);
+    }
+
+    /**
+     * Every action carries an icon, and each is decorative: the label next
+     * to it already names the action.
+     */
+    public function test_actions_carry_decorative_icons(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        foreach (['viewericon', 'downloadicon', 'purgeicon'] as $icon) {
+            $this->assertStringContainsString('aria-hidden="true"', $data[$icon]);
+        }
+    }
 }

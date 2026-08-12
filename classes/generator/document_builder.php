@@ -97,13 +97,21 @@ final class document_builder {
      * this documents whatever the site currently exposes, not tool_openapi's
      * own version.
      *
+     * The context is passed to format_string() rather than left to default,
+     * because this runs from places that have no page context to fall back
+     * on: the scheduled task, and openapi.php, which serves a machine and
+     * deliberately never calls require_login(). Without it, format_string()
+     * reaches for $PAGE->context, finds none, and emits a debugging notice
+     * that lands in the middle of the JSON being sent.
+     *
      * @return array
      */
     private static function build_info(): array {
         global $CFG, $SITE;
 
         return [
-            'title' => format_string($SITE->fullname) . ' web services',
+            'title' => format_string($SITE->fullname, true, ['context' => \context_system::instance()])
+                . ' web services',
             'version' => $CFG->release,
             'description' => 'Generated from this site\'s external_functions catalog by tool_openapi.',
         ];

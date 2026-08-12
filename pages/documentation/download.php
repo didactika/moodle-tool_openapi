@@ -36,6 +36,10 @@ require(__DIR__ . '/../../../../../config.php');
 require_login();
 require_capability('tool/openapi:manage', \context_system::instance());
 
+// This page sends a file, never a rendered page, so nothing else here sets
+// a context -- and format_string() below needs one.
+$PAGE->set_context(\context_system::instance());
+
 $format = required_param('format', PARAM_ALPHA);
 if (!in_array($format, ['json', 'yaml'], true)) {
     throw new \invalid_parameter_exception('Unknown format: ' . $format);

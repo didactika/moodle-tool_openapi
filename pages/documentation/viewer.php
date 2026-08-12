@@ -17,10 +17,11 @@
 /**
  * Browses the generated catalog with the bundled Swagger UI.
  *
- * The library is a plain browser bundle, so it is loaded as an ordinary
- * script in the page head rather than as an AMD dependency: it defines the
- * global that tool_openapi/viewer then configures. Head, not footer, so the
- * global is certain to exist by the time the AMD call runs.
+ * The library is a plain browser bundle, not an AMD module: it defines a
+ * global that tool_openapi/viewer then configures. The template includes it
+ * directly -- see its own comment for why it cannot go through
+ * $PAGE->requires->js() -- so all this page adds is the stylesheet, which
+ * has no such problem, and the AMD call the footer emits after it.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -43,7 +44,6 @@ $renderable = new \tool_openapi\output\documentation\viewer_page();
 $context = $renderable->export_for_template($OUTPUT);
 
 $PAGE->requires->css(new moodle_url('/admin/tool/openapi/thirdparty/swagger-ui/swagger-ui.css'));
-$PAGE->requires->js(new moodle_url('/admin/tool/openapi/thirdparty/swagger-ui/swagger-ui-bundle.js'), true);
 $PAGE->requires->js_call_amd('tool_openapi/viewer', 'init', [
     $context['specurl'],
     $context['endpoint'],

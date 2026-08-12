@@ -21,20 +21,29 @@
     UI fills it once it has fetched the document, which is why the page also
     loads tool_openapi/viewer.
 
+    The library is included with a plain script tag rather than through
+    $PAGE->requires->js(), which would route it through lib/javascript.php
+    and run an already-minified 1.5MB bundle through core_minify a second
+    time -- that produces truncated, unparseable output. Placed before the
+    container, and so ahead of the AMD call the footer emits, which is what
+    the module needs to find the global it defines.
+
     Context variables required for this template:
     * heading - Section heading
     * headingdesc - Sentence under the heading
-    * tokenhint - What a reader needs before Try it out will work
+    * tokenhint - Pre-rendered notification: what a reader needs before Try it out will work
     * backurl / backlabel - The way back to the documentation page
+    * libraryurl - The bundled Swagger UI script
     * elementid - Id of the container Swagger UI renders into
 
     Example context (json):
     {
         "heading": "Interactive viewer",
         "headingdesc": "Browse every function this site exposes.",
-        "tokenhint": "Paste a token into the wstoken field to send a request.",
+        "tokenhint": "<div class=\"alert alert-info\">Paste a token into the wstoken field.</div>",
         "backurl": "https://example.com/documentation/index.php",
         "backlabel": "Back to documentation",
+        "libraryurl": "https://example.com/thirdparty/swagger-ui/swagger-ui-bundle.js",
         "elementid": "tool_openapi-viewer"
     }
 }}
@@ -43,6 +52,7 @@
 <h3>{{heading}}</h3>
 <p class="text-muted">{{headingdesc}}</p>
 
-<div class="alert alert-info" role="note">{{tokenhint}}</div>
+{{{tokenhint}}}
 
+<script src="{{libraryurl}}"></script>
 <div id="{{elementid}}"></div>
