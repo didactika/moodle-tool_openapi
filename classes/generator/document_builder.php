@@ -27,9 +27,22 @@ use core_external\external_description;
  * that function's own read/write type) under a synthetic path named after
  * the function. Moodle itself has a single real endpoint
  * (webservice/rest/server.php) with wsfunction as a selector, which OpenAPI
- * has no native way to express as one path with many operations, so this
+ * has no native way to express as one path with many operations (a given
+ * path+method pair can only ever describe one Operation Object), so this
  * documents each function as its own path instead, matching how Swagger UI
- * (and every other OpenAPI consumer) expects to browse an API.
+ * (and every other OpenAPI consumer) expects to browse an API. Every
+ * operation carries an x-moodle-real-endpoint extension and a note in its
+ * own description pointing at the one real URL, so a consumer (or a future
+ * Swagger UI requestInterceptor -- see the viewer page's own plan) knows
+ * this path is an organisational convenience, not the literal request target.
+ *
+ * The request shape documented here (requestBody as
+ * application/x-www-form-urlencoded, wstoken/wsfunction/moodlewsrestformat
+ * as query parameters) is not a guess: webservice/rest/lib.php's
+ * parse_request() does array_merge($_GET, $_POST) and never reads a JSON
+ * body -- confirmed reading that file directly, not assumed from Moodle's
+ * public docs, since PHP only auto-populates $_POST for
+ * x-www-form-urlencoded/multipart bodies, never for application/json.
  *
  * Only ever runs during a full catalog (re)generation -- see type_mapper's
  * docblock for why that keeps this off any live request path.
@@ -41,12 +54,18 @@ use core_external\external_description;
  */
 final class document_builder {
     /**
+     * The one real Moodle REST endpoint every synthetic path documented
+     * here actually resolves to -- see the class docblock.
+     */
+    private const REAL_ENDPOINT = '/webservice/rest/server.php';
+
+    /**
      * Build the OpenAPI 3.1 document for every installed webservice function.
      *
      * @return array
      */
     public static function build(): array {
-        global $DB;
+        global $CFG, $DB;
 
         $paths = [];
         foreach ($DB->get_records('external_functions', null, 'name ASC') as $function) {
@@ -59,8 +78,12 @@ final class document_builder {
         return [
             'openapi' => '3.1.0',
             'info' => self::build_info(),
+            'servers' => [['url' => $CFG->wwwroot]],
             'paths' => $paths,
-            'components' => ['schemas' => self::build_shared_schemas()],
+            'components' => [
+                'schemas' => self::build_shared_schemas(),
+                'parameters' => self::build_shared_parameters(),
+            ],
         ];
     }
 
@@ -117,16 +140,32 @@ final class document_builder {
      * @return array
      */
     private static function build_path_item(\stdClass $info): array {
+        $realendpointnote = 'Real request target: POST ' . self::REAL_ENDPOINT
+            . ' with wsfunction=' . $info->name . ' merged into the query string or form body -- '
+            . 'this path exists for documentation only, Moodle has no per-function URL.';
+
         $operation = [
             'operationId' => $info->name,
             'tags' => [$info->component],
             'deprecated' => $info->deprecated ?? false,
+            'description' => $realendpointnote,
+            'x-moodle-real-endpoint' => self::REAL_ENDPOINT,
             'x-moodle-capabilities' => empty($info->capabilities) ? [] : explode(',', $info->capabilities),
             'x-moodle-ajax-allowed' => $info->allowed_from_ajax ?? false,
+            'parameters' => [
+                ['$ref' => '#/components/parameters/wstoken'],
+                ['$ref' => '#/components/parameters/moodlewsrestformat'],
+                [
+                    'name' => 'wsfunction',
+                    'in' => 'query',
+                    'required' => true,
+                    'schema' => ['type' => 'string', 'const' => $info->name],
+                ],
+            ],
             'requestBody' => [
                 'required' => true,
                 'content' => [
-                    'application/json' => ['schema' => type_mapper::map($info->parameters_desc)],
+                    'application/x-www-form-urlencoded' => ['schema' => type_mapper::map($info->parameters_desc)],
                 ],
             ],
             'responses' => self::build_responses($info->returns_desc),
@@ -180,6 +219,34 @@ final class document_builder {
                     'message' => ['type' => 'string'],
                 ],
                 'required' => ['exception', 'errorcode', 'message'],
+            ],
+        ];
+    }
+
+    /**
+     * Parameters identical across every operation, referenced by $ref
+     * instead of repeated in each of the (possibly hundreds of) operations.
+     * wsfunction is not here -- its value differs per operation, see
+     * build_path_item().
+     *
+     * @return array
+     */
+    private static function build_shared_parameters(): array {
+        return [
+            'wstoken' => [
+                'name' => 'wstoken',
+                'in' => 'query',
+                'required' => true,
+                'description' => 'A token issued from this site\'s OpenAPI documentation Tokens page, '
+                    . 'or any other valid Moodle webservice token.',
+                'schema' => ['type' => 'string'],
+            ],
+            'moodlewsrestformat' => [
+                'name' => 'moodlewsrestformat',
+                'in' => 'query',
+                'required' => false,
+                'description' => 'Response format. Moodle defaults to xml when this is omitted.',
+                'schema' => ['type' => 'string', 'enum' => ['json', 'xml'], 'default' => 'json'],
             ],
         ];
     }

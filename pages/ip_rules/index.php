@@ -15,11 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Lists tool_openapi_ip_rules rows and creates new ones.
- *
- * Editing an existing row is ip_rules/edit.php, deleting is
- * ip_rules/delete.php -- same split as pages/tokens/index.php's own
- * create-here, act-elsewhere pattern.
+ * Lists tool_openapi_ip_rules rows. Creating one is ip_rules/create.php,
+ * editing is ip_rules/edit.php, deleting is ip_rules/delete.php -- this
+ * page only ever lists.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -39,31 +37,14 @@ $PAGE->set_title(get_string('manageiprules', 'tool_openapi'));
 $PAGE->set_heading(get_string('manageiprules', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
 
-$form = new \tool_openapi\form\ip_rule_form();
-
-if ($form->is_cancelled()) {
-    redirect(new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'));
-} else if ($data = $form->get_data()) {
-    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
-
-    $DB->insert_record('tool_openapi_ip_rules', (object) [
-        'iprange' => $data->iprange,
-        'description' => $data->description,
-        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
-        'enabled' => $data->enabled,
-        'timecreated' => time(),
-    ]);
-
-    redirect(
-        new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'),
-        get_string('iprulesaved', 'tool_openapi'),
-        null,
-        \core\output\notification::NOTIFY_SUCCESS
-    );
-}
-
 echo $OUTPUT->header();
 echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_ip_rules'));
+
+$createurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/create.php');
+echo html_writer::div(
+    html_writer::link($createurl, get_string('addiprule', 'tool_openapi'), ['class' => 'btn btn-primary']),
+    'd-flex justify-content-end mb-3'
+);
 
 $rules = $DB->get_records('tool_openapi_ip_rules', null, 'id ASC');
 
@@ -98,10 +79,10 @@ if ($rules) {
 
     echo html_writer::table($table);
 } else {
-    echo html_writer::tag('p', get_string('noiprules', 'tool_openapi'));
+    echo html_writer::div(
+        html_writer::tag('p', get_string('noiprules', 'tool_openapi'), ['class' => 'mb-0']),
+        'text-center text-muted py-5 border rounded'
+    );
 }
-
-echo $OUTPUT->heading(get_string('addiprule', 'tool_openapi'), 3);
-$form->display();
 
 echo $OUTPUT->footer();

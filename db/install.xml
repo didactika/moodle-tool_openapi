@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="admin/tool/openapi/db" VERSION="2026081101" COMMENT="XMLDB file for tool_openapi">
+<XMLDB PATH="admin/tool/openapi/db" VERSION="2026081201" COMMENT="XMLDB file for tool_openapi">
   <TABLES>
     <TABLE NAME="tool_openapi_tokens" COMMENT="Plugin-issued tokens, for reading the documentation only">
       <FIELDS>
@@ -7,6 +7,7 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Label, so an admin can tell which integrator this token is"/>
         <FIELD NAME="tokenhash" TYPE="char" LENGTH="64" NOTNULL="true" COMMENT="SHA-256 of the token, never the plaintext"/>
         <FIELD NAME="allowedfunctions" TYPE="text" NOTNULL="false" COMMENT="One function name per line; null means the full catalog"/>
+        <FIELD NAME="iprestriction" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Same shape as core external_tokens.iprestriction; null means no IP restriction"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Personal data, covered by the privacy provider"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
         <FIELD NAME="lastused" TYPE="int" LENGTH="10" NOTNULL="false"/>

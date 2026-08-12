@@ -84,6 +84,17 @@ final class yaml_encoder_test extends \basic_testcase {
     }
 
     /**
+     * An empty stdClass -- type_mapper's explicit marker for "this is
+     * definitely an empty object, not an empty list" -- is written inline
+     * as "{}", not guessed at like a genuinely ambiguous empty PHP array.
+     */
+    public function test_encode_empty_stdclass_is_inline_empty_map(): void {
+        $yaml = yaml_encoder::encode(['properties' => new \stdClass()]);
+
+        $this->assertSame("\"properties\": {}\n", $yaml);
+    }
+
+    /**
      * A sequence item that is itself a mapping puts "- " before its first
      * key and aligns the rest of that mapping's keys underneath it.
      */

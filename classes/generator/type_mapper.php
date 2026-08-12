@@ -120,7 +120,12 @@ final class type_mapper {
             }
         }
 
-        $schema = ['type' => 'object', 'properties' => $properties];
+        // PHP's json_encode() renders an empty array as "[]", not "{}" --
+        // invalid JSON Schema, since "properties" must be an object. Only
+        // the empty case needs the (object) cast: a non-empty associative
+        // array already encodes correctly, and every existing test
+        // compares against one.
+        $schema = ['type' => 'object', 'properties' => $properties === [] ? new \stdClass() : $properties];
         if ($required !== []) {
             $schema['required'] = $required;
         }

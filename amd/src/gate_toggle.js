@@ -14,13 +14,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Enable/disable toggle for the access-gate rows on pages/access_control/index.php.
- *
- * Progressive enhancement over a plain link: the link itself
- * (pages/access_control/toggle.php with sesskey) already works with no
- * JS, full page reload included. This only intercepts the click and
- * replays the same request with ajax=1, then patches the row in place
- * instead of navigating.
+ * Enable/disable handling for the access-gate switches on
+ * pages/access_control/index.php (core/toggle, a real Moodle switch --
+ * see that page's own docblock for why, not a bespoke widget).
  *
  * @module     tool_openapi/gate_toggle
  * @copyright  2026 Didactika.org
@@ -31,73 +27,38 @@ import {get_string as getString} from 'core/str';
 import {addNotification} from 'core/notification';
 
 /**
- * Patches one gate row's icon, alt text and status badge after a toggle.
+ * Sends the new state to pages/access_control/toggle.php, reverting the
+ * switch if the request fails so the UI never shows a state that was not
+ * actually saved.
  *
- * @param {Element} link The toggle link
- * @param {boolean} enabled The gate's new state
+ * @param {HTMLInputElement} checkbox The switch's checkbox input
  */
-const applyState = async(link, enabled) => {
-    const icon = link.querySelector('img.tool_openapi-gate-icon');
-    if (icon) {
-        icon.src = enabled ? link.dataset.iconOn : link.dataset.iconOff;
-        icon.alt = enabled ? link.dataset.labelOn : link.dataset.labelOff;
-    }
-
-    const newValue = enabled ? '0' : '1';
-    link.dataset.value = newValue;
-
-    const url = new URL(link.href, window.location.origin);
-    url.searchParams.set('value', newValue);
-    link.href = url.toString();
-
-    const status = link.closest('td')?.querySelector('.tool_openapi-gate-status');
-    if (status) {
-        const [enabledLabel, disabledLabel] = await Promise.all([
-            getString('enabled', 'tool_openapi'),
-            getString('disabled', 'tool_openapi'),
-        ]);
-
-        status.textContent = enabled ? enabledLabel : disabledLabel;
-        status.classList.toggle('badge-success', enabled);
-        status.classList.toggle('badge-secondary', !enabled);
-    }
-};
-
-/**
- * Toggles one gate via AJAX and patches the row, falling back to a
- * notification if the request itself fails.
- *
- * @param {Element} link The toggle link
- */
-const toggleGate = async(link) => {
-    const url = new URL(link.href, window.location.origin);
-    url.searchParams.set('ajax', '1');
+const toggleGate = async(checkbox) => {
+    const url = new URL(checkbox.dataset.actionurl, window.location.origin);
+    url.searchParams.set('gate', checkbox.dataset.gate);
+    url.searchParams.set('sesskey', checkbox.dataset.sesskey);
+    url.searchParams.set('value', checkbox.checked ? '1' : '0');
 
     try {
         const response = await fetch(url.toString());
         if (!response.ok) {
             throw new Error('Request failed');
         }
-
-        const body = await response.json();
-        await applyState(link, body.enabled);
     } catch (e) {
+        checkbox.checked = !checkbox.checked;
         const message = await getString('gatetogglefailed', 'tool_openapi');
         await addNotification({message, type: 'error'});
     }
 };
 
 /**
- * Initialise the gate-toggle links.
+ * Initialise the gate-toggle switches.
  */
 export const init = () => {
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('.tool_openapi-gate-toggle');
-        if (!link) {
-            return;
+    document.addEventListener('change', (e) => {
+        const checkbox = e.target.closest('input.custom-control-input[data-gate]');
+        if (checkbox) {
+            toggleGate(checkbox);
         }
-
-        e.preventDefault();
-        toggleGate(link);
     });
 };

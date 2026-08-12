@@ -115,6 +115,21 @@ final class type_mapper_test extends \basic_testcase {
     }
 
     /**
+     * A structure with no declared keys still maps "properties" as a JSON
+     * object, not an empty array -- json_encode() renders a plain empty PHP
+     * array as "[]", which is invalid JSON Schema ("properties" must be an
+     * object). Confirmed as a real bug generating the catalog against a
+     * live Moodle install: some external_single_structure descriptions in
+     * core genuinely declare zero keys.
+     */
+    public function test_empty_structure_maps_properties_as_an_object_not_an_array(): void {
+        $schema = type_mapper::map(new external_single_structure([]));
+
+        $this->assertInstanceOf(\stdClass::class, $schema['properties']);
+        $this->assertSame('{}', json_encode($schema['properties']));
+    }
+
+    /**
      * A nested object/array/scalar tree maps exactly.
      */
     public function test_maps_a_nested_structure_exactly(): void {

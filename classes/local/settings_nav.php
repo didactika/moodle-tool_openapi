@@ -44,7 +44,7 @@ final class settings_nav {
             new \tabobject(
                 'tool_openapi_settings',
                 new \moodle_url('/admin/settings.php', ['section' => 'tool_openapi']),
-                get_string('generalsettings', 'tool_openapi')
+                get_string('cacheheading', 'tool_openapi')
             ),
             new \tabobject(
                 'tool_openapi_access_control',

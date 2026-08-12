@@ -17,11 +17,11 @@
 /**
  * Turns each of the 4 access gates on or off.
  *
- * One row per gate, an enable/disable icon-link exactly like Moodle's own
- * admin/webservice/protocols.php uses for enabling a protocol -- not a
- * bespoke widget. The link is a full GET to access_control/toggle.php and
- * works with no JS at all; amd/src/gate_toggle.js progressively
- * upgrades it into an in-place AJAX toggle.
+ * One row per gate, a real Moodle switch (core/toggle,
+ * lib/templates/toggle.mustache -- the same Bootstrap custom-switch
+ * component used elsewhere in core, e.g. notification preferences) rather
+ * than a bespoke widget. amd/src/gate_toggle.js listens for its change
+ * event and calls access_control/toggle.php via fetch.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -56,44 +56,29 @@ $gates = [
 ];
 
 $table = new html_table();
-$table->head = ['', '', get_string('status')];
+$table->head = ['', '', ''];
 
 foreach ($gates as $configkey => [$namestring, $descstring]) {
     $enabled = (bool) get_config('tool_openapi', $configkey);
 
-    $toggleurl = new moodle_url('/admin/tool/openapi/pages/access_control/toggle.php', [
-        'gate' => $configkey,
-        'value' => $enabled ? 0 : 1,
-        'sesskey' => sesskey(),
-    ]);
+    $toggleurl = new moodle_url('/admin/tool/openapi/pages/access_control/toggle.php');
 
-    $icon = html_writer::empty_tag('img', [
-        'src' => $enabled ? $OUTPUT->image_url('t/hide', 'moodle') : $OUTPUT->image_url('t/show', 'moodle'),
-        'alt' => $enabled ? get_string('disablegate', 'tool_openapi') : get_string('enablegate', 'tool_openapi'),
-        'class' => 'tool_openapi-gate-icon',
-        'width' => 16,
-        'height' => 16,
+    $toggle = $OUTPUT->render_from_template('core/toggle', [
+        'id' => 'tool_openapi-gate-' . $configkey,
+        'checked' => $enabled,
+        'dataattributes' => [
+            ['name' => 'gate', 'value' => $configkey],
+            ['name' => 'sesskey', 'value' => sesskey()],
+            ['name' => 'actionurl', 'value' => $toggleurl->out(false)],
+        ],
+        'label' => get_string($namestring, 'tool_openapi'),
+        'labelclasses' => 'sr-only',
     ]);
-
-    $toggle = html_writer::link($toggleurl, $icon, [
-        'class' => 'tool_openapi-gate-toggle',
-        'data-gate' => $configkey,
-        'data-value' => $enabled ? '0' : '1',
-        'data-icon-on' => $OUTPUT->image_url('t/hide', 'moodle')->out(false),
-        'data-icon-off' => $OUTPUT->image_url('t/show', 'moodle')->out(false),
-        'data-label-on' => get_string('disablegate', 'tool_openapi'),
-        'data-label-off' => get_string('enablegate', 'tool_openapi'),
-    ]);
-
-    $status = html_writer::span(
-        $enabled ? get_string('enabled', 'tool_openapi') : get_string('disabled', 'tool_openapi'),
-        'tool_openapi-gate-status badge ' . ($enabled ? 'badge-success' : 'badge-secondary')
-    );
 
     $table->data[] = [
         get_string($namestring, 'tool_openapi'),
         get_string($descstring, 'tool_openapi'),
-        $status . ' ' . $toggle,
+        $toggle,
     ];
 }
 

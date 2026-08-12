@@ -20,11 +20,12 @@ namespace tool_openapi\generator;
  * Turns a document_builder document (OpenAPI 3.1 / JSON Schema 2020-12)
  * into OpenAPI 3.0.3.
  *
- * One generator, two outputs: type_mapper only ever produces one
- * incompatibility between the two OpenAPI versions -- a nullable field's
- * "type": [X, "null"] (valid in 3.1, not in 3.0) -- so this is a single
- * recursive rewrite of that one pattern into 3.0's own "type": X,
- * "nullable": true, not a second, parallel generator.
+ * One generator, two outputs, two rewrites in the same recursive pass:
+ * - a nullable field's "type": [X, "null"] (valid in 3.1, not in 3.0)
+ *   becomes 3.0's own "type": X, "nullable": true;
+ * - a single-value "const" (2020-12 JSON Schema, used for wsfunction's
+ *   fixed-per-operation value) becomes a one-element "enum" -- the closest
+ *   3.0's older JSON Schema dialect has, since it has no "const" keyword.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -47,7 +48,8 @@ final class openapi_downgrader {
     }
 
     /**
-     * Rewrite this node's [type, "null"] pair if present, then recurse.
+     * Rewrite this node's [type, "null"] pair and/or "const" if present,
+     * then recurse.
      *
      * @param mixed $node
      * @return mixed
@@ -61,6 +63,11 @@ final class openapi_downgrader {
             $realtypes = array_values(array_diff($node['type'], ['null']));
             $node['type'] = $realtypes[0];
             $node['nullable'] = true;
+        }
+
+        if (array_key_exists('const', $node)) {
+            $node['enum'] = [$node['const']];
+            unset($node['const']);
         }
 
         foreach ($node as $key => $value) {

@@ -15,12 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Create and revoke tool_openapi_tokens rows.
+ * Lists tool_openapi_tokens rows. Creating one is tokens/create.php,
+ * revoking is tokens/revoke.php -- this page only ever lists and reveals.
  *
  * Tokens are shown in plaintext exactly once, right after creation --
  * same Post/Redirect/Get pattern local_servicemanager uses for its own
  * service tokens (db/caches.php's 'newtoken', session-scoped, TTL 300s).
- * Only the hash is ever stored or shown again after this one request.
+ * Only the hash is ever stored or shown again after this one request --
+ * create.php redirects here with ?newtoken=<id> to trigger the reveal.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -40,29 +42,6 @@ $PAGE->set_title(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_heading(get_string('managetokens', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
 $PAGE->requires->js_call_amd('tool_openapi/copy_to_clipboard', 'init');
-
-$form = new \tool_openapi\form\token_form();
-
-if ($form->is_cancelled()) {
-    redirect(new moodle_url('/admin/tool/openapi/pages/tokens/index.php'));
-} else if ($data = $form->get_data()) {
-    $plaintext = random_string(32);
-    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
-
-    $id = $DB->insert_record('tool_openapi_tokens', (object) [
-        'name' => $data->name,
-        'tokenhash' => hash('sha256', $plaintext),
-        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
-        'createdby' => $USER->id,
-        'timecreated' => time(),
-        'lastused' => null,
-        'revoked' => 0,
-    ]);
-
-    \cache::make('tool_openapi', 'newtoken')->set($id, $plaintext);
-
-    redirect(new moodle_url('/admin/tool/openapi/pages/tokens/index.php', ['newtoken' => $id]));
-}
 
 $newtokenid = optional_param('newtoken', 0, PARAM_INT);
 $newtokenvalue = null;
@@ -103,6 +82,12 @@ if ($newtokenvalue !== null) {
     echo html_writer::end_div();
 }
 
+$createurl = new moodle_url('/admin/tool/openapi/pages/tokens/create.php');
+echo html_writer::div(
+    html_writer::link($createurl, get_string('createtoken', 'tool_openapi'), ['class' => 'btn btn-primary']),
+    'd-flex justify-content-end mb-3'
+);
+
 $tokens = $DB->get_records('tool_openapi_tokens', null, 'timecreated DESC');
 
 if ($tokens) {
@@ -110,6 +95,7 @@ if ($tokens) {
     $table->head = [
         get_string('tokenname', 'tool_openapi'),
         get_string('allowedfunctions', 'tool_openapi'),
+        get_string('iprange', 'tool_openapi'),
         get_string('created', 'tool_openapi'),
         get_string('lastused', 'tool_openapi'),
         get_string('status'),
@@ -138,6 +124,7 @@ if ($tokens) {
         $table->data[] = [
             $token->name,
             $scope,
+            $token->iprestriction ?? get_string('noiprestriction', 'tool_openapi'),
             userdate($token->timecreated),
             $token->lastused ? userdate($token->lastused) : get_string('never', 'tool_openapi'),
             $status,
@@ -147,10 +134,10 @@ if ($tokens) {
 
     echo html_writer::table($table);
 } else {
-    echo html_writer::tag('p', get_string('notokens', 'tool_openapi'));
+    echo html_writer::div(
+        html_writer::tag('p', get_string('notokens', 'tool_openapi'), ['class' => 'mb-0']),
+        'text-center text-muted py-5 border rounded'
+    );
 }
-
-echo $OUTPUT->heading(get_string('createtoken', 'tool_openapi'), 3);
-$form->display();
 
 echo $OUTPUT->footer();

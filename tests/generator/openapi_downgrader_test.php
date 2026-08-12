@@ -84,6 +84,20 @@ final class openapi_downgrader_test extends \basic_testcase {
     }
 
     /**
+     * A single-value "const" (2020-12 JSON Schema, used for wsfunction's
+     * fixed value) becomes a one-element "enum" -- 3.0's dialect has no
+     * "const" keyword.
+     */
+    public function test_const_becomes_a_one_element_enum(): void {
+        $document = $this->document_with_schema(['type' => 'string', 'const' => 'core_course_get_courses']);
+
+        $schema = $this->schema_from(openapi_downgrader::to_3_0($document));
+
+        $this->assertSame(['type' => 'string', 'enum' => ['core_course_get_courses']], $schema);
+        $this->assertArrayNotHasKey('const', $schema);
+    }
+
+    /**
      * A nullable field nested inside an object inside an array is still found.
      */
     public function test_recurses_into_nested_object_and_array_schemas(): void {

@@ -39,7 +39,12 @@ namespace tool_openapi\generator;
  * conceptually is -- the same call json_encode() already makes for the
  * rest of this codebase's JSON output, so the two output formats stay
  * consistent with each other rather than one trying to be smarter than
- * the other about a case PHP's own type system can't express.
+ * the other about a case PHP's own type system can't express. The one
+ * exception is an empty stdClass, which type_mapper hands back
+ * specifically for an object schema's "properties" when a structure
+ * declares no keys (see that class's own docblock) -- there the caller
+ * already knows for certain it is a map, not a list, so this writes "{}"
+ * for that one case instead of guessing "[]".
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -124,12 +129,16 @@ final class yaml_encoder {
     }
 
     /**
-     * Encode a leaf value: an empty array, or a scalar.
+     * Encode a leaf value: an empty array, an empty object, or a scalar.
      *
      * @param mixed $value
      * @return string
      */
     private static function encode_leaf(mixed $value): string {
+        if ($value instanceof \stdClass) {
+            return '{}';
+        }
+
         return is_array($value) ? '[]' : self::encode_scalar($value);
     }
 
