@@ -66,6 +66,38 @@ final class access_control_page_test extends \advanced_testcase {
     }
 
     /**
+     * The page names the one endpoint these methods govern, so an
+     * administrator can tell what a switch just opened.
+     */
+    public function test_page_names_the_endpoint_it_gates(): void {
+        global $CFG, $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertSame($CFG->wwwroot . '/admin/tool/openapi/openapi.php', $data['endpointurl']);
+        $this->assertStringContainsString('tool/openapi:manage', $data['endpointdesc']);
+    }
+
+    /**
+     * Each switch carries what the browser side needs to save it: which
+     * gate, where to post, and a sesskey.
+     */
+    public function test_switch_carries_its_data_attributes(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $toggle = (new page())->export_for_template($PAGE->get_renderer('core'))['rows'][0]['toggle'];
+
+        $this->assertStringContainsString('data-gate="enablesessiongate"', $toggle);
+        $this->assertStringContainsString('data-sesskey=', $toggle);
+        $this->assertStringContainsString('data-actionurl=', $toggle);
+        $this->assertStringContainsString('type="checkbox"', $toggle);
+    }
+
+    /**
      * A gate's switch reflects its stored config value.
      */
     public function test_switch_reflects_stored_config(): void {
