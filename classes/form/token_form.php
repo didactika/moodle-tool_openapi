@@ -16,6 +16,7 @@
 
 namespace tool_openapi\form;
 
+use tool_openapi\local\ip_range_validator;
 use tool_openapi\local\service_functions;
 
 defined('MOODLE_INTERNAL') || die();
@@ -45,6 +46,10 @@ class token_form extends \moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required');
 
+        $mform->addElement('text', 'iprestriction', get_string('iprange', 'tool_openapi'));
+        $mform->setType('iprestriction', PARAM_RAW_TRIMMED);
+        $mform->addElement('static', 'iprestriction_desc', '', get_string('iprange_desc', 'tool_openapi'));
+
         $mform->addElement('advcheckbox', 'restrictfunctions', get_string('restrictfunctions', 'tool_openapi'), '', null, [0, 1]);
         $mform->setDefault('restrictfunctions', 0);
         $mform->addHelpButton('restrictfunctions', 'restrictfunctions', 'tool_openapi');
@@ -72,6 +77,10 @@ class token_form extends \moodleform {
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        if (!empty($data['iprestriction']) && !ip_range_validator::is_valid($data['iprestriction'])) {
+            $errors['iprestriction'] = get_string('invalidiprange', 'tool_openapi');
+        }
 
         if (!empty($data['restrictfunctions']) && empty($data['allowedfunctions'])) {
             $errors['allowedfunctions'] = get_string('emptyallowedfunctions', 'tool_openapi');

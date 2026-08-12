@@ -34,7 +34,7 @@ final class token_gate_test extends \advanced_testcase {
      * Cleans up the simulated header after each test.
      */
     protected function tearDown(): void {
-        unset($_SERVER['HTTP_AUTHORIZATION']);
+        unset($_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REMOTE_ADDR']);
         parent::tearDown();
     }
 
@@ -44,15 +44,22 @@ final class token_gate_test extends \advanced_testcase {
      * @param string $plaintext
      * @param string|null $allowedfunctions
      * @param int $revoked
+     * @param string|null $iprestriction
      * @return int
      */
-    private function create_token(string $plaintext, ?string $allowedfunctions = null, int $revoked = 0): int {
+    private function create_token(
+        string $plaintext,
+        ?string $allowedfunctions = null,
+        int $revoked = 0,
+        ?string $iprestriction = null
+    ): int {
         global $DB;
 
         return $DB->insert_record('tool_openapi_tokens', (object) [
             'name' => 'test token',
             'tokenhash' => hash('sha256', $plaintext),
             'allowedfunctions' => $allowedfunctions,
+            'iprestriction' => $iprestriction,
             'createdby' => get_admin()->id,
             'timecreated' => time(),
             'lastused' => null,
@@ -119,6 +126,31 @@ final class token_gate_test extends \advanced_testcase {
 
         $this->assertNotNull($scope);
         $this->assertSame(['core_course_get_courses'], $scope->allowed_functions());
+    }
+
+    /**
+     * A token whose iprestriction matches the caller's address authorizes.
+     */
+    public function test_token_with_matching_iprestriction_authorizes(): void {
+        $this->resetAfterTest();
+        $this->create_token('sometoken123', null, 0, '192.0.2.0/24');
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer sometoken123';
+        $_SERVER['REMOTE_ADDR'] = '192.0.2.5';
+
+        $this->assertNotNull((new token_gate())->authorize(null));
+    }
+
+    /**
+     * A token whose iprestriction does not match the caller's address does
+     * not authorize -- same check core itself does in webservice/lib.php.
+     */
+    public function test_token_with_non_matching_iprestriction_does_not_authorize(): void {
+        $this->resetAfterTest();
+        $this->create_token('sometoken123', null, 0, '192.0.2.0/24');
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer sometoken123';
+        $_SERVER['REMOTE_ADDR'] = '203.0.113.1';
+
+        $this->assertNull((new token_gate())->authorize(null));
     }
 
     /**

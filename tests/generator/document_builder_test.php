@@ -44,8 +44,11 @@ final class document_builder_test extends \advanced_testcase {
 
         $this->assertSame('3.1.0', $doc['openapi']);
         $this->assertSame($CFG->release, $doc['info']['version']);
+        $this->assertSame($CFG->wwwroot, $doc['servers'][0]['url']);
         $this->assertArrayHasKey('paths', $doc);
         $this->assertArrayHasKey('components', $doc);
+        $this->assertArrayHasKey('wstoken', $doc['components']['parameters']);
+        $this->assertArrayHasKey('moodlewsrestformat', $doc['components']['parameters']);
     }
 
     /**
@@ -79,12 +82,19 @@ final class document_builder_test extends \advanced_testcase {
         $operation = $doc['paths']['/core_webservice_get_site_info']['post'];
 
         $this->assertSame('core_webservice_get_site_info', $operation['operationId']);
-        $this->assertArrayHasKey('schema', $operation['requestBody']['content']['application/json']);
+        $this->assertSame('/webservice/rest/server.php', $operation['x-moodle-real-endpoint']);
+        $this->assertArrayHasKey('schema', $operation['requestBody']['content']['application/x-www-form-urlencoded']);
+        $this->assertArrayNotHasKey('application/json', $operation['requestBody']['content']);
         $this->assertArrayHasKey('content', $operation['responses']['200']);
         $this->assertSame(
             ['$ref' => '#/components/schemas/WebserviceError'],
             $operation['responses']['default']['content']['application/json']['schema']
         );
+
+        $wsfunctionparam = end($operation['parameters']);
+        $this->assertSame('wsfunction', $wsfunctionparam['name']);
+        $this->assertSame('core_webservice_get_site_info', $wsfunctionparam['schema']['const']);
+        $this->assertContains(['$ref' => '#/components/parameters/wstoken'], $operation['parameters']);
     }
 
     /**

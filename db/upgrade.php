@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for tool_openapi
+ * Upgrade steps for tool_openapi.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -23,11 +23,27 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Upgrade steps for tool_openapi.
+ *
+ * @param int $oldversion
+ * @return bool
+ */
+function xmldb_tool_openapi_upgrade(int $oldversion): bool {
+    global $DB;
 
-$plugin->component = 'tool_openapi';
-$plugin->version = 2026081201;
-$plugin->requires = 2024100700; // Moodle 4.5+.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0';
-$plugin->supported = [405, 502]; // Moodle 4.5 to 5.2.
+    $dbman = $DB->get_manager();
+
+    if ($oldversion < 2026081201) {
+        $table = new xmldb_table('tool_openapi_tokens');
+        $field = new xmldb_field('iprestriction', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'allowedfunctions');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026081201, 'tool', 'openapi');
+    }
+
+    return true;
+}

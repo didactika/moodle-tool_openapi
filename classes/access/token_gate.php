@@ -63,6 +63,12 @@ final class token_gate implements access_gate {
             return null;
         }
 
+        // Same check core itself does for a webservice token's own
+        // iprestriction -- see webservice/lib.php.
+        if ($record->iprestriction && !address_in_subnet(getremoteaddr(), $record->iprestriction)) {
+            return null;
+        }
+
         $DB->set_field('tool_openapi_tokens', 'lastused', time(), ['id' => $record->id]);
 
         return scope::from_allowedfunctions_field($record->allowedfunctions);

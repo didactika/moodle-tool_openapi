@@ -17,12 +17,11 @@
 /**
  * Turns one access gate on or off.
  *
- * Same one-shot action pattern as pages/purge_cache.php (require_sesskey,
- * no confirmation screen -- a gate toggle is trivially reversible by
- * clicking it again). Serves both the plain-link fallback (redirect back
- * to access_control/index.php) and amd/src/gate_toggle.js's AJAX call
- * (ajax=1, JSON body instead of a redirect) from the same script, so
- * there is exactly one place that decides whether a gate key is real.
+ * Same auth/capability/sesskey checks as every other action page, but
+ * always answers JSON: the access_control/index.php switch
+ * (lib/templates/toggle.mustache, core/toggle) is a real Moodle component
+ * that already assumes JS, same as everywhere else core uses it, so there
+ * is no plain-link fallback mode to keep supporting here.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -38,7 +37,6 @@ require_sesskey();
 
 $gate = required_param('gate', PARAM_ALPHANUMEXT);
 $value = required_param('value', PARAM_BOOL);
-$isajax = optional_param('ajax', 0, PARAM_BOOL);
 
 $allowedgates = ['enablesessiongate', 'enableipgate', 'enabletokengate', 'enablewstokengate'];
 if (!in_array($gate, $allowedgates, true)) {
@@ -47,15 +45,5 @@ if (!in_array($gate, $allowedgates, true)) {
 
 set_config($gate, $value ? 1 : 0, 'tool_openapi');
 
-if ($isajax) {
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['enabled' => (bool) $value]);
-    exit;
-}
-
-redirect(
-    new moodle_url('/admin/tool/openapi/pages/access_control/index.php'),
-    get_string('changessaved'),
-    null,
-    \core\output\notification::NOTIFY_SUCCESS
-);
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode(['enabled' => (bool) $value]);
