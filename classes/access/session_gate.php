@@ -32,8 +32,8 @@ use tool_openapi\local\service_functions;
  * tool/openapi:view only grants a specific service's functions, named via
  * ?service= -- a capability is a boolean, it cannot carry an arbitrary
  * function list the way a token or IP rule row can, so for a person (as
- * opposed to a machine) the per-service recorte is the only restriction
- * that makes sense. See 02-arquitectura.md.
+ * opposed to a machine) the per-service restriction is the only one that
+ * makes sense.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>

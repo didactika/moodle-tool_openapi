@@ -18,7 +18,7 @@ namespace tool_openapi\local;
 
 /**
  * Which functions belong to an external service -- shared by
- * generator\service_filter (the "extra" per-service document recorte) and
+ * generator\service_filter (the per-service document filter) and
  * access\session_gate (a :view-only session must name a service to see
  * anything), so the lookup and its "unknown service" error live in one
  * place instead of two.

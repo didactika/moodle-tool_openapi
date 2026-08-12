@@ -26,12 +26,12 @@ use core_external\external_value;
  * Tests for type_mapper.
  *
  * The nested-structure fixture mirrors core_course_get_courses's real
- * execute_parameters() shape, as dumped against live Moodle 4.5 and 5.2
- * installs in the fase 1 spike (.claude/proposal/04-plan-de-fases.md) --
- * hand-built here rather than fetched from the live core function, because
- * that spike also showed the real shape already drifting once between the
- * two supported Moodle versions (5.2 adds a field 4.5 does not have), which
- * would make an exact comparison against the live function version-fragile.
+ * execute_parameters() shape, as confirmed against live Moodle 4.5 and 5.2
+ * installs -- hand-built here rather than fetched from the live core
+ * function, because that comparison also showed the real shape already
+ * drifting once between the two supported Moodle versions (5.2 adds a
+ * field 4.5 does not have), which would make an exact comparison against
+ * the live function version-fragile.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -82,7 +82,7 @@ final class type_mapper_test extends \basic_testcase {
      */
     public function test_normalises_multiline_descriptions(): void {
         // Real desc string from core_course_get_contents on both 4.5 and 5.2,
-        // indentation and all, confirmed by the fase 1 spike.
+        // indentation and all.
         $desc = "Type of completion tracking:\n"
             . "                                        0 means none, 1 manual, 2 automatic.";
         $value = new external_value(PARAM_INT, $desc, VALUE_REQUIRED, null, NULL_NOT_ALLOWED);
@@ -115,9 +115,9 @@ final class type_mapper_test extends \basic_testcase {
     }
 
     /**
-     * A nested object/array/scalar tree maps exactly, per the fase 1 spike.
+     * A nested object/array/scalar tree maps exactly.
      */
-    public function test_maps_the_nested_structure_confirmed_by_the_fase1_spike(): void {
+    public function test_maps_a_nested_structure_exactly(): void {
         $params = new external_function_parameters([
             'options' => new external_single_structure([
                 'ids' => new external_multiple_structure(

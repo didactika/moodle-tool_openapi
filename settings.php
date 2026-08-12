@@ -18,18 +18,16 @@
  * Settings for tool_openapi
  *
  * Registered under the 'tools' admin category, not a category of its own --
- * an admin tool gets that category for free, unlike a local plugin. See
- * 02-arquitectura.md.
+ * an admin tool gets that category for free, unlike a local plugin.
  *
  * The settings page itself is deliberately minimal so far: just the cache
- * purge action fase 4 needs, plus links to the tokens/IP rules admin
- * pages. The access-method toggles (enablesessiongate and friends) and
- * the viewer/Swagger UI page are fase 5's own scope -- see
- * 06-comandos-pendientes.md for why that split is not a half-finished
- * vertical slice: every gate is already closed by default via get_config()
- * returning falsy when unset, so nothing here is required for the access
- * engine or the endpoint to behave correctly, only for an administrator to
- * turn a method on from the UI instead of by hand.
+ * purge action, plus links to the tokens/IP rules admin pages. The
+ * access-method toggles (enablesessiongate and friends) and the viewer/
+ * Swagger UI page are not wired in here yet -- every gate is already
+ * closed by default via get_config() returning falsy when unset, so
+ * nothing here is required for the access engine or the endpoint to
+ * behave correctly, only for an administrator to turn a method on from
+ * the UI instead of by hand.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
