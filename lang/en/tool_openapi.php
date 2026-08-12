@@ -103,4 +103,5 @@ $string['tokenname'] = 'Name';
 $string['viewer'] = 'Open the interactive viewer';
 $string['viewerheading'] = 'Interactive viewer';
 $string['viewerheading_desc'] = 'Browse every function this site exposes, with its parameters, its return shape and the capabilities it requires.';
+$string['viewerrestdisabled'] = 'Try it out will fail while this site has web services or the REST protocol turned off: Moodle answers those requests with an empty 403. Browsing the catalog below works either way. <a href="{$a}">Enable web services</a>.';
 $string['viewertokenhint'] = 'Requests sent from here go to this site\'s REST endpoint. Put a token in the wstoken field of an operation before using Try it out, otherwise Moodle will reject the request.';

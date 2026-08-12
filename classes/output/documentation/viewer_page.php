@@ -51,6 +51,8 @@ class viewer_page implements \renderable, \templatable {
     public function export_for_template(renderer_base $output): array {
         global $CFG;
 
+        require_once($CFG->dirroot . '/webservice/lib.php');
+
         $specurl = new \moodle_url('/admin/tool/openapi/pages/documentation/download.php', [
             'format' => 'json',
             'inline' => 1,
@@ -66,6 +68,7 @@ class viewer_page implements \renderable, \templatable {
                 \core\output\notification::NOTIFY_INFO,
                 false
             ),
+            'restwarning' => $this->rest_warning($output),
             'backurl' => (new \moodle_url('/admin/tool/openapi/pages/documentation/index.php'))->out(false),
             'backlabel' => get_string('backtodocumentation', 'tool_openapi'),
             'elementid' => self::ELEMENT_ID,
@@ -73,5 +76,32 @@ class viewer_page implements \renderable, \templatable {
             'libraryurl' => $library->out(false),
             'endpoint' => $CFG->wwwroot . '/webservice/rest/server.php',
         ];
+    }
+
+    /**
+     * Warns that Try it out cannot work yet, or nothing if it can.
+     *
+     * Without the REST protocol turned on, webservice/rest/server.php
+     * answers a bare 403 with no body at all, which tells whoever pressed
+     * Execute nothing about what to do. Documenting the catalog does not
+     * require web services to be enabled -- the document is built from the
+     * function registry either way -- so this is a real state to be in, not
+     * a misconfiguration to refuse to render.
+     *
+     * @param renderer_base $output
+     * @return string Empty when REST is available.
+     */
+    private function rest_warning(renderer_base $output): string {
+        if (webservice_protocol_is_enabled('rest')) {
+            return '';
+        }
+
+        $settings = new \moodle_url('/admin/settings.php', ['section' => 'webservicesoverview']);
+
+        return $output->notification(
+            get_string('viewerrestdisabled', 'tool_openapi', $settings->out()),
+            \core\output\notification::NOTIFY_WARNING,
+            false
+        );
     }
 }

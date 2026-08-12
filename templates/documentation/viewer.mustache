@@ -32,6 +32,7 @@
     * heading - Section heading
     * headingdesc - Sentence under the heading
     * tokenhint - Pre-rendered notification: what a reader needs before Try it out will work
+    * restwarning - Pre-rendered notification, empty unless the REST protocol is off
     * backurl / backlabel - The way back to the documentation page
     * libraryurl - The bundled Swagger UI script
     * elementid - Id of the container Swagger UI renders into
@@ -41,6 +42,7 @@
         "heading": "Interactive viewer",
         "headingdesc": "Browse every function this site exposes.",
         "tokenhint": "<div class=\"alert alert-info\">Paste a token into the wstoken field.</div>",
+        "restwarning": "",
         "backurl": "https://example.com/documentation/index.php",
         "backlabel": "Back to documentation",
         "libraryurl": "https://example.com/thirdparty/swagger-ui/swagger-ui-bundle.js",
@@ -52,6 +54,7 @@
 <h3>{{heading}}</h3>
 <p class="text-muted">{{headingdesc}}</p>
 
+{{{restwarning}}}
 {{{tokenhint}}}
 
 <script src="{{libraryurl}}"></script>

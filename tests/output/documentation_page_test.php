@@ -107,6 +107,25 @@ final class documentation_page_test extends \advanced_testcase {
     }
 
     /**
+     * With the REST protocol off, the viewer says so: Moodle answers Try it
+     * out with a bare 403 and no body, which explains nothing on its own.
+     */
+    public function test_viewer_warns_when_rest_is_unavailable(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        set_config('enablewebservices', 0);
+        $data = (new viewer_page())->export_for_template($PAGE->get_renderer('core'));
+        $this->assertNotSame('', $data['restwarning']);
+
+        set_config('enablewebservices', 1);
+        set_config('webserviceprotocols', 'rest');
+        $data = (new viewer_page())->export_for_template($PAGE->get_renderer('core'));
+        $this->assertSame('', $data['restwarning']);
+    }
+
+    /**
      * Every action carries an icon, and each is decorative: the label next
      * to it already names the action.
      */
