@@ -24,11 +24,12 @@
  * breadcrumb. Pages that skip it end up with no breadcrumb and their own
  * heading where the site name should be.
  *
- * Tokens and IP rules are registered hidden (the 5th admin_externalpage
- * argument): they are reached from the cog on their access method in
- * pages/access_control, not from the admin tree, but they still need to be
- * locatable for admin_externalpage_setup() to work. Same approach core
- * takes for its own webservice service pages, see admin/settings/server.php.
+ * Tokens, IP rules and the viewer are registered hidden (the 5th
+ * admin_externalpage argument): they are reached from the page that owns
+ * them -- the cog on an access method, the button on the documentation page
+ * -- not from the admin tree, but they still need to be locatable for
+ * admin_externalpage_setup() to work. Same approach core takes for its own
+ * webservice service pages, see admin/settings/server.php.
  *
  * There is no admin_settingpage: every gate is stored via set_config() from
  * pages/access_control/toggle.php, so the plugin has no setting an
@@ -57,6 +58,14 @@ if ($hassiteconfig) {
         get_string('managedocumentation', 'tool_openapi'),
         new moodle_url('/admin/tool/openapi/pages/documentation/index.php'),
         'tool/openapi:manage'
+    ));
+
+    $ADMIN->add('tool_openapi', new admin_externalpage(
+        'tool_openapi_viewer',
+        get_string('viewerheading', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/documentation/viewer.php'),
+        'tool/openapi:manage',
+        true
     ));
 
     $ADMIN->add('tool_openapi', new admin_externalpage(

@@ -52,13 +52,7 @@ class page implements \renderable, \templatable {
             'purgeurl' => $purgeurl->out(false),
             'purgelabel' => get_string('purgecache', 'tool_openapi'),
             'viewerlabel' => get_string('viewer', 'tool_openapi'),
-            // The interactive viewer is not built yet. Rendering it as a
-            // disabled control with an explanation, rather than hiding it,
-            // keeps the page's shape stable for when it does land and tells
-            // an administrator it is coming instead of leaving them
-            // wondering whether they are missing a setting.
-            'viewerurl' => '',
-            'viewerdisabledreason' => get_string('viewercomingsoon', 'tool_openapi'),
+            'viewerurl' => (new \moodle_url('/admin/tool/openapi/pages/documentation/viewer.php'))->out(false),
         ];
     }
 }

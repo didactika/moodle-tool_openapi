@@ -55,8 +55,10 @@ class page implements \renderable, \templatable {
                 'gatewstoken',
                 'gatewstoken_desc',
                 // Moodle's own token page: a reused webservice token is
-                // created and revoked there, never here.
-                new \moodle_url('/admin/settings.php', ['section' => 'webservicetokens']),
+                // created and revoked there, never here. The manage page
+                // itself, not the admin setting section that merely embeds
+                // it, so the cog lands where the tokens actually are.
+                new \moodle_url('/admin/webservice/tokens.php'),
             ],
         ];
     }

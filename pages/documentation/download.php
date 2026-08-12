@@ -41,10 +41,17 @@ if (!in_array($format, ['json', 'yaml'], true)) {
     throw new \invalid_parameter_exception('Unknown format: ' . $format);
 }
 
-$document = \tool_openapi\local\document_cache::get();
-$filename = clean_filename(format_string($SITE->shortname)) . '-openapi.' . ($format === 'yaml' ? 'yaml' : 'json');
+// The viewer fetches the same document through this same page, and has
+// nowhere to put a file: asking for it inline is what keeps the browser
+// from turning that fetch into a download.
+$inline = optional_param('inline', 0, PARAM_BOOL);
 
-header('Content-Disposition: attachment; filename="' . $filename . '"');
+$document = \tool_openapi\local\document_cache::get();
+
+if (!$inline) {
+    $filename = clean_filename(format_string($SITE->shortname)) . '-openapi.' . ($format === 'yaml' ? 'yaml' : 'json');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+}
 
 if ($format === 'yaml') {
     header('Content-Type: application/yaml; charset=utf-8');

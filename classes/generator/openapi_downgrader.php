@@ -27,6 +27,14 @@ namespace tool_openapi\generator;
  *   fixed-per-operation value) becomes a one-element "enum" -- the closest
  *   3.0's older JSON Schema dialect has, since it has no "const" keyword.
  *
+ * Which nodes are schemas matters here, and cannot be assumed from their
+ * shape. Inside "properties" the keys are field names chosen by whoever
+ * wrote the function, and plenty of Moodle functions return a field called
+ * "type" -- treating that map as a schema would read a property's own
+ * definition as a type declaration and overwrite it. So "properties" is
+ * descended into one child at a time, and only those children are read as
+ * schemas.
+ *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
@@ -71,9 +79,29 @@ final class openapi_downgrader {
         }
 
         foreach ($node as $key => $value) {
+            if ($key === 'properties' && is_array($value)) {
+                $node[$key] = self::downgrade_properties($value);
+                continue;
+            }
+
             $node[$key] = self::downgrade_tree($value);
         }
 
         return $node;
+    }
+
+    /**
+     * Recurse into a "properties" map without reading the map itself as a
+     * schema -- see the class docblock.
+     *
+     * @param array $properties Field name => schema.
+     * @return array
+     */
+    private static function downgrade_properties(array $properties): array {
+        foreach ($properties as $name => $schema) {
+            $properties[$name] = self::downgrade_tree($schema);
+        }
+
+        return $properties;
     }
 }

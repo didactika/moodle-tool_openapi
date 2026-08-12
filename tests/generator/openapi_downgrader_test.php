@@ -118,4 +118,50 @@ final class openapi_downgrader_test extends \basic_testcase {
             $schema['items']['properties']['idnumber']
         );
     }
+
+    /**
+     * A field actually called "type" is a field, not a type declaration.
+     *
+     * Plenty of Moodle functions return one (calendar events, grade items,
+     * enrolment instances), and reading its schema as this object's own
+     * type both destroys the field and adds a nullable flag to the map of
+     * properties.
+     */
+    public function test_a_property_named_type_is_not_read_as_a_type(): void {
+        $document = $this->document_with_schema([
+            'type' => 'object',
+            'properties' => [
+                'type' => ['type' => ['string', 'null'], 'description' => 'Event type'],
+                'name' => ['type' => 'string'],
+            ],
+        ]);
+
+        $schema = $this->schema_from(openapi_downgrader::to_3_0($document));
+
+        $this->assertSame('object', $schema['type']);
+        $this->assertArrayNotHasKey('nullable', $schema);
+        $this->assertSame(
+            ['type' => 'string', 'description' => 'Event type', 'nullable' => true],
+            $schema['properties']['type']
+        );
+        $this->assertSame(['type' => 'string'], $schema['properties']['name']);
+    }
+
+    /**
+     * The same, for a field called "const": rewriting it to an enum would
+     * drop the field's own schema.
+     */
+    public function test_a_property_named_const_is_not_rewritten(): void {
+        $document = $this->document_with_schema([
+            'type' => 'object',
+            'properties' => [
+                'const' => ['type' => 'string'],
+            ],
+        ]);
+
+        $schema = $this->schema_from(openapi_downgrader::to_3_0($document));
+
+        $this->assertArrayNotHasKey('enum', $schema);
+        $this->assertSame(['type' => 'string'], $schema['properties']['const']);
+    }
 }

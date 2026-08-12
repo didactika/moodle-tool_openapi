@@ -28,6 +28,12 @@ namespace tool_openapi\local;
  * present) are the real invariant this class needs to guarantee, not
  * byte-for-byte equality between two separately timestamped documents.
  *
+ * The document/cache comparisons use assertEquals rather than assertSame
+ * for a second reason: a schema with no properties is an empty stdClass,
+ * so that it encodes as {} and not [], and assertSame on an array holding
+ * objects demands the very same instances -- which a value that has been
+ * through the cache never is.
+ *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
  * @copyright  2026 Didactika.org
@@ -55,7 +61,7 @@ final class document_cache_test extends \advanced_testcase {
 
         $document = document_cache::get();
 
-        $this->assertSame($document, \cache::make('tool_openapi', 'document')->get('document'));
+        $this->assertEquals($document, \cache::make('tool_openapi', 'document')->get('document'));
     }
 
     /**
@@ -81,6 +87,6 @@ final class document_cache_test extends \advanced_testcase {
         $document = document_cache::get();
 
         $this->assertArrayHasKey('/core_webservice_get_site_info', $document['paths']);
-        $this->assertSame($document, \cache::make('tool_openapi', 'document')->get('document'));
+        $this->assertEquals($document, \cache::make('tool_openapi', 'document')->get('document'));
     }
 }

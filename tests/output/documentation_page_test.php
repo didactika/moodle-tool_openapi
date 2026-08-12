@@ -1,0 +1,90 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+namespace tool_openapi\output;
+
+use tool_openapi\output\documentation\page;
+use tool_openapi\output\documentation\viewer_page;
+
+/**
+ * Tests for the documentation renderables.
+ *
+ * @package    tool_openapi
+ * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
+ * @copyright  2026 Didactika.org
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \tool_openapi\output\documentation\page
+ * @covers     \tool_openapi\output\documentation\viewer_page
+ */
+final class documentation_page_test extends \advanced_testcase {
+    /**
+     * Both formats are offered, and each asks the download endpoint for
+     * its own.
+     */
+    public function test_both_download_formats_are_offered(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertStringContainsString('format=json', $data['jsonurl']);
+        $this->assertStringContainsString('format=yaml', $data['yamlurl']);
+    }
+
+    /**
+     * Purging is a state change, so its link carries a sesskey.
+     */
+    public function test_purge_link_is_sesskey_protected(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertStringContainsString('sesskey=', $data['purgeurl']);
+    }
+
+    /**
+     * The viewer is a real destination now, not a placeholder.
+     */
+    public function test_viewer_is_linked(): void {
+        global $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertStringContainsString('documentation/viewer.php', $data['viewerurl']);
+    }
+
+    /**
+     * The viewer loads the document from this plugin's own admin-only
+     * endpoint, inline, and points Try it out at Moodle's REST server.
+     */
+    public function test_viewer_page_wiring(): void {
+        global $CFG, $PAGE;
+
+        $this->resetAfterTest();
+
+        $data = (new viewer_page())->export_for_template($PAGE->get_renderer('core'));
+
+        $this->assertStringContainsString('documentation/download.php', $data['specurl']);
+        $this->assertStringContainsString('inline=1', $data['specurl']);
+        $this->assertSame($CFG->wwwroot . '/webservice/rest/server.php', $data['endpoint']);
+        $this->assertSame(viewer_page::ELEMENT_ID, $data['elementid']);
+    }
+}

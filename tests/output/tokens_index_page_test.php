@@ -33,11 +33,11 @@ final class tokens_index_page_test extends \advanced_testcase {
      * table for the empty state.
      */
     public function test_no_tokens_sets_the_empty_flag(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
-        $data = (new index_page([]))->export_for_template($OUTPUT);
+        $data = (new index_page([]))->export_for_template($PAGE->get_renderer('core'));
 
         $this->assertFalse($data['hastokens']);
         $this->assertSame([], $data['rows']);
@@ -48,7 +48,7 @@ final class tokens_index_page_test extends \advanced_testcase {
      * restriction, rather than blank cells.
      */
     public function test_unrestricted_token_row(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
@@ -61,7 +61,7 @@ final class tokens_index_page_test extends \advanced_testcase {
             'lastused' => null,
         ];
 
-        $data = (new index_page([$token]))->export_for_template($OUTPUT);
+        $data = (new index_page([$token]))->export_for_template($PAGE->get_renderer('core'));
         $row = $data['rows'][0];
 
         $this->assertTrue($data['hastokens']);
@@ -77,7 +77,7 @@ final class tokens_index_page_test extends \advanced_testcase {
      * newline-separated field.
      */
     public function test_restricted_token_row_lists_its_functions(): void {
-        global $OUTPUT;
+        global $PAGE;
 
         $this->resetAfterTest();
 
@@ -90,7 +90,7 @@ final class tokens_index_page_test extends \advanced_testcase {
             'lastused' => 1767312000,
         ];
 
-        $row = (new index_page([$token]))->export_for_template($OUTPUT)['rows'][0];
+        $row = (new index_page([$token]))->export_for_template($PAGE->get_renderer('core'))['rows'][0];
 
         $this->assertSame('core_course_get_courses, core_user_get_users', $row['scope']);
         $this->assertSame('192.0.2.0/24', $row['iprestriction']);

@@ -4,3 +4,9 @@
 /.github        export-ignore
 /.gitignore     export-ignore
 /.gitattributes export-ignore
+
+# Vendored library files, kept byte-for-byte as shipped upstream: no line
+# ending conversion, so what is checked out on Windows is still what the
+# upstream release contained.
+/thirdparty/** -text
+

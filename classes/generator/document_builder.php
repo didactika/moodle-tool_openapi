@@ -68,10 +68,14 @@ final class document_builder {
         global $CFG, $DB;
 
         $paths = [];
+        $tags = [];
         foreach ($DB->get_records('external_functions', null, 'name ASC') as $function) {
             $item = self::build_path_or_skip($function);
             if ($item !== null) {
                 $paths['/' . $function->name] = $item;
+                foreach ($item['post']['tags'] as $tag) {
+                    $tags[$tag] = true;
+                }
             }
         }
 
@@ -79,6 +83,7 @@ final class document_builder {
             'openapi' => '3.1.0',
             'info' => self::build_info(),
             'servers' => [['url' => $CFG->wwwroot]],
+            'tags' => self::build_tags(array_keys($tags)),
             'paths' => $paths,
             'components' => [
                 'schemas' => self::build_shared_schemas(),
@@ -102,6 +107,36 @@ final class document_builder {
             'version' => $CFG->release,
             'description' => 'Generated from this site\'s external_functions catalog by tool_openapi.',
         ];
+    }
+
+    /**
+     * The document's root tag list: every tag actually used by an
+     * operation, in alphabetical order.
+     *
+     * Declared explicitly rather than left implicit because a viewer that
+     * meets a tag only on an operation has nothing to order the groups by
+     * and no description to show above them, so the catalog comes out in
+     * whatever order the paths happen to be in.
+     *
+     * @param string[] $names Tags used by at least one operation.
+     * @return array
+     */
+    private static function build_tags(array $names): array {
+        sort($names);
+
+        $tags = [];
+        foreach ($names as $name) {
+            $tag = ['name' => $name];
+
+            $description = tag_mapper::describe($name);
+            if ($description !== null) {
+                $tag['description'] = $description;
+            }
+
+            $tags[] = $tag;
+        }
+
+        return $tags;
     }
 
     /**
@@ -146,7 +181,7 @@ final class document_builder {
 
         $operation = [
             'operationId' => $info->name,
-            'tags' => [$info->component],
+            'tags' => [tag_mapper::for_function($info->component, $info->name)],
             'deprecated' => $info->deprecated ?? false,
             'description' => $realendpointnote,
             'x-moodle-real-endpoint' => self::REAL_ENDPOINT,
