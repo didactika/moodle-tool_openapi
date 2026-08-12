@@ -19,14 +19,12 @@
  *
  * Machine-facing, not an admin UI page -- lives at the plugin root, the
  * same convention Moodle's own webservice/rest/server.php follows, instead
- * of under pages/. Confirmed against that real core file that skipping
- * require_login() in favour of a script's own auth is an accepted pattern
- * for an entry point like this one. See 02-arquitectura.md.
+ * of under pages/. Skipping require_login() in favour of a script's own
+ * auth is an accepted pattern for an entry point like this one.
  *
  * Access is decided before anything else touches the cache or the catalog,
  * on purpose: a request that is not authorized gets a 403 without any hint
- * of whether the requested ?service= even exists. See
- * 03-control-de-acceso.md's "Que recibe una peticion rechazada".
+ * of whether the requested ?service= even exists.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -44,12 +42,13 @@ require(__DIR__ . '/../../../config.php'); // phpcs:ignore moodle.Files.RequireL
 /**
  * Emit a minimal JSON error body.
  *
- * Deliberately never says *why* a request was rejected -- see
- * 03-control-de-acceso.md. Does not stop the script itself: every call
- * site is immediately followed by its own exit, kept at the top level of
- * this script rather than inside a reusable function -- a function whose
- * whole point is to unconditionally terminate the request is not a unit
- * worth separating from where that termination actually happens.
+ * Deliberately never says *why* a request was rejected, so an
+ * unauthorized caller cannot use the error message to probe which gate
+ * failed. Does not stop the script itself: every call site is immediately
+ * followed by its own exit, kept at the top level of this script rather
+ * than inside a reusable function -- a function whose whole point is to
+ * unconditionally terminate the request is not a unit worth separating
+ * from where that termination actually happens.
  *
  * @param int $httpstatus
  * @param string $error

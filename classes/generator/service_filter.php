@@ -23,10 +23,9 @@ use tool_openapi\local\service_functions;
  *
  * Deliberately not cached: external_services_functions can change without
  * a plugin install/upgrade/uninstall (an administrator can edit a custom
- * service's function list at any time), so this recorte does not have the
- * same cache-invalidation guarantee as the full catalog and is recomputed
- * on every request that asks for it -- see 01-alcance-y-funcionalidades.md
- * in the plan.
+ * service's function list at any time), so this filtered result does not
+ * have the same cache-invalidation guarantee as the full catalog and is
+ * recomputed on every request that asks for it.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>

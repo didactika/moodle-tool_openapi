@@ -19,8 +19,7 @@
  *
  * Deleted for real, unlike tokens -- an IP rule is site configuration
  * (which addresses are allowed), not a record of what a credential did,
- * so there is no audit trail to preserve by revoking instead. See
- * 02-arquitectura.md's privacy section for the same distinction.
+ * so there is no audit trail to preserve by revoking instead.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>

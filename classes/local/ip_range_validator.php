@@ -18,8 +18,10 @@ namespace tool_openapi\local;
 
 /**
  * Format validation for tool_openapi_ip_rules.iprange, the check that
- * admin_setting_configiplist gives the core for free -- see
- * 02-arquitectura.md's note on why that setting type could not be reused.
+ * admin_setting_configiplist gives the core for free for a single global
+ * admin setting -- not usable here, since each row of
+ * tool_openapi_ip_rules is validated as a moodleform field bound to a
+ * database table, not a site-wide config value.
  *
  * A structural port of address_in_subnet() (lib/moodlelib.php): the same
  * three notations (bare address, CIDR, range, and the partial-address

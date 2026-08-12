@@ -108,10 +108,11 @@ final class scope {
     /**
      * Trim a document's paths down to what this scope allows.
      *
-     * Same recorte as generator\service_filter, applied by function name
-     * instead of by service shortname -- kept here, not there, because
-     * this is the scope's own concern: what an already-authorized accessor
-     * gets to see, independent of whether a ?service= was also requested.
+     * Same kind of filtering as generator\service_filter, applied by
+     * function name instead of by service shortname -- kept here, not
+     * there, because this is the scope's own concern: what an
+     * already-authorized accessor gets to see, independent of whether a
+     * ?service= was also requested.
      *
      * @param array $document A document as returned by document_builder::build().
      * @return array A copy of $document with paths trimmed to this scope.

@@ -127,7 +127,8 @@ final class access_checker_test extends \basic_testcase {
 
     /**
      * With no gates at all, the request is denied -- the most important
-     * security property of this plugin, per 03-control-de-acceso.md.
+     * security property of this plugin: access is opt-in, never open by
+     * default.
      */
     public function test_no_gates_denies_the_request(): void {
         $checker = new access_checker([]);

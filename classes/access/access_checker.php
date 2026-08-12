@@ -23,7 +23,7 @@ namespace tool_openapi\access;
  * Closed by default -- with nothing enabled (a freshly installed site,
  * before an administrator turns any method on), every gate's is_enabled()
  * is false, so authorize() always returns null. There is no "default"
- * method left active, on purpose: see 03-control-de-acceso.md.
+ * method left active, on purpose.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -43,7 +43,7 @@ final class access_checker {
     }
 
     /**
-     * The real gates, in the order 03-control-de-acceso.md lists them.
+     * The real gates, tried in order: session, then IP, then token, then wstoken.
      *
      * @return self
      */

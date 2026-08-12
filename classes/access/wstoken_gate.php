@@ -29,7 +29,7 @@ use tool_openapi\local\service_functions;
  * Enabling this gate adds no new authorization surface: anyone who could
  * already obtain a legitimate wstoken already had access to call those
  * functions; seeing them documented gives nothing they did not already
- * have. See 03-control-de-acceso.md.
+ * have.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>

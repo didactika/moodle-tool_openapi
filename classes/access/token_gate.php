@@ -21,9 +21,8 @@ namespace tool_openapi\access;
  *
  * Read via the Authorization: Bearer header, never a ?token= query
  * parameter -- a query parameter ends up in web server access logs,
- * browser history and proxy tooling, a header does not (see
- * 03-control-de-acceso.md). Only the SHA-256 of the token is ever stored
- * or compared, never the plaintext.
+ * browser history and proxy tooling, a header does not. Only the
+ * SHA-256 of the token is ever stored or compared, never the plaintext.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>

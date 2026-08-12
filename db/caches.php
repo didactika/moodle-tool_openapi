@@ -28,12 +28,11 @@ defined('MOODLE_INTERNAL') || die();
 $definitions = [
     // The full catalog document (document_builder::build()). Application-wide,
     // never invalidated by hand in normal operation: Moodle's own plugin
-    // install/upgrade/uninstall cycle (upgrade_noncore(), see
-    // 02-arquitectura.md's "Invalidacion de cache") already purges every
-    // application cache at the only moment external_functions can actually
-    // change, which is why there is no event observer here. The per-service
-    // recorte (generator\service_filter) is deliberately never cached at
-    // all -- see that class's own docblock.
+    // install/upgrade/uninstall cycle (upgrade_noncore()) already purges
+    // every application cache at the only moment external_functions can
+    // actually change, which is why there is no event observer here. The
+    // per-service filter (generator\service_filter) is deliberately never
+    // cached at all -- see that class's own docblock.
     'document' => [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => true,
