@@ -126,7 +126,11 @@ if ($tokens) {
         $actions = '';
         if (!$token->revoked) {
             $revokeurl = new moodle_url('/admin/tool/openapi/pages/revoke_token.php', ['id' => $token->id]);
-            $actions = html_writer::link($revokeurl, get_string('revoke', 'tool_openapi'), ['class' => 'btn btn-outline-danger btn-sm']);
+            $actions = html_writer::link(
+                $revokeurl,
+                get_string('revoke', 'tool_openapi'),
+                ['class' => 'btn btn-outline-danger btn-sm']
+            );
         }
 
         $table->data[] = [
