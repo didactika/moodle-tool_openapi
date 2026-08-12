@@ -5,6 +5,17 @@ composed with OR: a request is authorized if **any enabled method** accepts
 it, and refused if none does. With nothing enabled -- which is how the
 plugin installs -- every request is refused.
 
+They govern **one URL and nothing else**:
+
+```
+<site>/admin/tool/openapi/openapi.php
+```
+
+The plugin's own pages -- the viewer, the downloads, these settings -- answer
+to the `tool/openapi:manage` capability instead, so an administrator can
+always reach the catalog with every method switched off. The Access control
+page states this at the top, with the address for your site.
+
 Each method also answers a second question: *how much* of the catalog the
 caller gets. That is the scope.
 
@@ -45,6 +56,8 @@ unrestricted for the full catalog.
 > address such as an office NAT gateway unless you accept that everyone
 > behind it is included.
 
+Managing rules: [ip-rules.md](ip-rules.md).
+
 ## Plugin token
 
 Authorizes a request carrying `Authorization: Bearer <token>`, where the
@@ -61,6 +74,8 @@ Deleting a token removes the row outright -- there is no revoked state
 lingering in the table. The lasting record is in the site log: this plugin
 logs a `token_created` and a `token_deleted` event, neither of which ever
 carries the token or its hash.
+
+Issuing and restricting them: [tokens.md](tokens.md).
 
 ## Existing webservice token
 

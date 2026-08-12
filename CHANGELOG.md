@@ -51,3 +51,14 @@ First release.
 - Spanish, Portuguese, Italian and French translations.
 - An hourly scheduled task that rebuilds the cached catalog, so no request
   pays the cost of building it.
+- A plugin icon.
+- Documentation under `docs/`: quick start, installation, one page per
+  feature, an endpoint reference, automation from a pipeline, troubleshooting
+  and development notes.
+
+### Changed
+
+- CI runs the test matrix on pull requests only. `CI complete` is the
+  required status check on the protected branches, so a push to one is always
+  an already-tested merge; `release.yml` still runs on push and decides
+  whether to tag a release.

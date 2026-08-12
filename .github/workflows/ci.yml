@@ -3,22 +3,28 @@ name: Moodle Plugin CI
 # Runs the moodle-plugin-ci checks (the same tests the Moodle.org plugins
 # database runs) so regressions are caught automatically.
 #
-# Branch model (see README.md): `main` is the development branch. This
-# template also ships one MOODLE_XXX_STABLE branch per Moodle version listed
-# in branches/ at the time it was generated -- delete whichever ones this
-# plugin does not actually support, do not cut them from scratch. Both kinds
-# of branch are protected, and both can publish a release (release.yml
-# triggers on either), so CI runs on pushes and pull requests targeting any
-# of them.
+# Branch model (see README.md): `main` is the development branch, plus one
+# MOODLE_XXX_STABLE branch per supported Moodle version. Both kinds are
+# protected and both can publish a release, since release.yml triggers on
+# either.
+#
+# On pull requests only, deliberately. The suite is the gate a change has to
+# pass to get in: `CI complete` below is the required status check on those
+# branches, so nothing reaches them without it. A push to a protected branch
+# is therefore always an already-tested merge, and re-running the whole
+# matrix on it would test the same commit a second time to answer a question
+# that has already been answered. What does run on a push is release.yml,
+# which only decides whether version.php changed enough to tag a release --
+# the same split npm packages use here.
+#
+# workflow_dispatch is the escape hatch for re-running the suite against a
+# branch by hand, without opening a pull request to do it.
 on:
-  push:
-    branches:
-      - main
-      - 'MOODLE_*_STABLE'
   pull_request:
     branches:
       - main
       - 'MOODLE_*_STABLE'
+  workflow_dispatch:
 
 jobs:
   setup:
@@ -271,6 +277,12 @@ jobs:
     # aggregator name never changes. It succeeds only when every matrix
     # combination in `test` succeeded. Do not rename this job's `name:` --
     # branch protection targets it by this exact string.
+    #
+    # `if: always()` is what makes it report at all when the matrix failed or
+    # was skipped, and is exactly why the step below has to assert the
+    # result instead of just echoing. A gate that runs unconditionally and
+    # succeeds unconditionally reports green over a red suite, which is worse
+    # than having no gate: it looks like one.
     name: CI complete
     if: always()
     needs: test
