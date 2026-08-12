@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Deletes a tool_openapi_ip_rules row.
+ * Revokes a tool_openapi_tokens row.
  *
- * Deleted for real, unlike tokens -- an IP rule is site configuration
- * (which addresses are allowed), not a record of what a credential did,
- * so there is no audit trail to preserve by revoking instead.
+ * Revokes, never deletes -- see db/install.xml's own comment on
+ * tool_openapi_tokens.revoked: keeps the audit trail of what a token did
+ * before it was revoked.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -27,7 +27,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
@@ -37,32 +37,32 @@ $id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_INT);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/delete_ip_rule.php', ['id' => $id]));
-$PAGE->set_title(get_string('delete'));
-$PAGE->set_heading(get_string('delete'));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', ['id' => $id]));
+$PAGE->set_title(get_string('revoke', 'tool_openapi'));
+$PAGE->set_heading(get_string('revoke', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
 
-$rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules.php');
+$tokensurl = new moodle_url('/admin/tool/openapi/pages/tokens/index.php');
 
-$rule = $DB->get_record('tool_openapi_ip_rules', ['id' => $id], '*', IGNORE_MISSING);
-if (!$rule) {
-    redirect($rulesurl);
+$token = $DB->get_record('tool_openapi_tokens', ['id' => $id], '*', IGNORE_MISSING);
+if (!$token) {
+    redirect($tokensurl);
 }
 
 if ($confirm && confirm_sesskey()) {
-    $DB->delete_records('tool_openapi_ip_rules', ['id' => $id]);
+    $DB->set_field('tool_openapi_tokens', 'revoked', 1, ['id' => $id]);
 
-    redirect($rulesurl, get_string('ipruledeleted', 'tool_openapi'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect($tokensurl, get_string('tokenrevoked', 'tool_openapi', $token->name), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 echo $OUTPUT->header();
 
-$confirmurl = new moodle_url('/admin/tool/openapi/pages/delete_ip_rule.php', [
+$confirmurl = new moodle_url('/admin/tool/openapi/pages/tokens/revoke.php', [
     'id' => $id,
     'confirm' => 1,
     'sesskey' => sesskey(),
 ]);
 
-echo $OUTPUT->confirm(get_string('confirmdeleteiprule', 'tool_openapi', $rule->iprange), $confirmurl, $rulesurl);
+echo $OUTPUT->confirm(get_string('confirmrevoketoken', 'tool_openapi', $token->name), $confirmurl, $tokensurl);
 
 echo $OUTPUT->footer();

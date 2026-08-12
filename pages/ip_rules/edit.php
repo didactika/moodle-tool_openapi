@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
@@ -32,35 +32,40 @@ require_capability('tool/openapi:manage', $context);
 $id = required_param('id', PARAM_INT);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/edit_ip_rule.php', ['id' => $id]));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/edit.php', ['id' => $id]));
 $PAGE->set_title(get_string('editiprule', 'tool_openapi'));
 $PAGE->set_heading(get_string('editiprule', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
 
-$rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules.php');
+$rulesurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php');
 
 $rule = $DB->get_record('tool_openapi_ip_rules', ['id' => $id], '*', IGNORE_MISSING);
 if (!$rule) {
     redirect($rulesurl);
 }
 
+$isrestricted = $rule->allowedfunctions !== null;
+
 $form = new \tool_openapi\form\ip_rule_form();
 $form->set_data([
     'id' => $rule->id,
     'iprange' => $rule->iprange,
     'description' => $rule->description,
-    'allowedfunctions' => $rule->allowedfunctions ?? '',
+    'restrictfunctions' => $isrestricted ? 1 : 0,
+    'allowedfunctions' => $isrestricted ? explode("\n", $rule->allowedfunctions) : [],
     'enabled' => $rule->enabled,
 ]);
 
 if ($form->is_cancelled()) {
     redirect($rulesurl);
 } else if ($data = $form->get_data()) {
+    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
+
     $DB->update_record('tool_openapi_ip_rules', (object) [
         'id' => $data->id,
         'iprange' => $data->iprange,
         'description' => $data->description,
-        'allowedfunctions' => trim($data->allowedfunctions) === '' ? null : $data->allowedfunctions,
+        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
         'enabled' => $data->enabled,
     ]);
 

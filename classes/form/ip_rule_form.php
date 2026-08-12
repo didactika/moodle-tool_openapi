@@ -17,6 +17,7 @@
 namespace tool_openapi\form;
 
 use tool_openapi\local\ip_range_validator;
+use tool_openapi\local\service_functions;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -48,14 +49,20 @@ class ip_rule_form extends \moodleform {
         $mform->addElement('text', 'description', get_string('ruledescription', 'tool_openapi'));
         $mform->setType('description', PARAM_TEXT);
 
+        $mform->addElement('advcheckbox', 'restrictfunctions', get_string('restrictfunctions', 'tool_openapi'), '', null, [0, 1]);
+        $mform->setDefault('restrictfunctions', 0);
+        $mform->addHelpButton('restrictfunctions', 'restrictfunctions', 'tool_openapi');
+
         $mform->addElement(
-            'textarea',
+            'autocomplete',
             'allowedfunctions',
             get_string('allowedfunctions', 'tool_openapi'),
-            ['rows' => 6, 'cols' => 60]
+            service_functions::all(),
+            ['multiple' => true, 'tags' => false]
         );
         $mform->setType('allowedfunctions', PARAM_RAW_TRIMMED);
-        $mform->addElement('static', 'allowedfunctions_desc', '', get_string('allowedfunctions_desc', 'tool_openapi'));
+        $mform->addHelpButton('allowedfunctions', 'allowedfunctions', 'tool_openapi');
+        $mform->hideIf('allowedfunctions', 'restrictfunctions', 'notchecked');
 
         $mform->addElement('advcheckbox', 'enabled', get_string('ruleenabled', 'tool_openapi'), '', null, [0, 1]);
         $mform->setDefault('enabled', 1);
@@ -75,6 +82,10 @@ class ip_rule_form extends \moodleform {
 
         if (!empty($data['iprange']) && !ip_range_validator::is_valid($data['iprange'])) {
             $errors['iprange'] = get_string('invalidiprange', 'tool_openapi');
+        }
+
+        if (!empty($data['restrictfunctions']) && empty($data['allowedfunctions'])) {
+            $errors['allowedfunctions'] = get_string('emptyallowedfunctions', 'tool_openapi');
         }
 
         return $errors;

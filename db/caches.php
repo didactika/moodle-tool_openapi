@@ -41,7 +41,7 @@ $definitions = [
     ],
 
     // Holds a freshly generated plugin token in plaintext, keyed by
-    // tool_openapi_tokens.id, so pages/tokens.php can show it exactly once
+    // tool_openapi_tokens.id, so pages/tokens/index.php can show it exactly once
     // after a Post/Redirect/Get -- same pattern local_servicemanager uses
     // for its own service tokens (db/caches.php's 'newtoken'). Session
     // scoped and short-lived so the plaintext does not linger in the

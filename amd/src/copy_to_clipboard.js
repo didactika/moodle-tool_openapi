@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Copy-to-clipboard button for pages/tokens.php's one-time token reveal.
+ * Copy-to-clipboard button for pages/tokens/index.php's one-time token reveal.
  *
  * Same clipboard-then-execCommand-fallback approach as
  * local_servicemanager/token_manager.js, trimmed down to just the copy

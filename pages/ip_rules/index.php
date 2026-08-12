@@ -17,9 +17,9 @@
 /**
  * Lists tool_openapi_ip_rules rows and creates new ones.
  *
- * Editing an existing row is edit_ip_rule.php, deleting is
- * delete_ip_rule.php -- same split as pages/tokens.php's own create-here,
- * act-elsewhere pattern.
+ * Editing an existing row is ip_rules/edit.php, deleting is
+ * ip_rules/delete.php -- same split as pages/tokens/index.php's own
+ * create-here, act-elsewhere pattern.
  *
  * @package    tool_openapi
  * @author     Hector Arrechea <hectorlazaroarrechea@gmail.com>
@@ -27,14 +27,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../../../config.php');
+require(__DIR__ . '/../../../../../config.php');
 
 require_login();
 $context = context_system::instance();
 require_capability('tool/openapi:manage', $context);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules.php'));
+$PAGE->set_url(new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'));
 $PAGE->set_title(get_string('manageiprules', 'tool_openapi'));
 $PAGE->set_heading(get_string('manageiprules', 'tool_openapi'));
 $PAGE->set_pagelayout('admin');
@@ -42,18 +42,20 @@ $PAGE->set_pagelayout('admin');
 $form = new \tool_openapi\form\ip_rule_form();
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/admin/tool/openapi/pages/ip_rules.php'));
+    redirect(new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'));
 } else if ($data = $form->get_data()) {
+    $restricted = !empty($data->restrictfunctions) && !empty($data->allowedfunctions);
+
     $DB->insert_record('tool_openapi_ip_rules', (object) [
         'iprange' => $data->iprange,
         'description' => $data->description,
-        'allowedfunctions' => trim($data->allowedfunctions) === '' ? null : $data->allowedfunctions,
+        'allowedfunctions' => $restricted ? implode("\n", $data->allowedfunctions) : null,
         'enabled' => $data->enabled,
         'timecreated' => time(),
     ]);
 
     redirect(
-        new moodle_url('/admin/tool/openapi/pages/ip_rules.php'),
+        new moodle_url('/admin/tool/openapi/pages/ip_rules/index.php'),
         get_string('iprulesaved', 'tool_openapi'),
         null,
         \core\output\notification::NOTIFY_SUCCESS
@@ -61,6 +63,7 @@ if ($form->is_cancelled()) {
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->render(\tool_openapi\local\settings_nav::tabtree('tool_openapi_ip_rules'));
 
 $rules = $DB->get_records('tool_openapi_ip_rules', null, 'id ASC');
 
@@ -79,8 +82,8 @@ if ($rules) {
             ? get_string('fullcatalog', 'tool_openapi')
             : implode(', ', array_filter(array_map('trim', explode("\n", $rule->allowedfunctions))));
 
-        $editurl = new moodle_url('/admin/tool/openapi/pages/edit_ip_rule.php', ['id' => $rule->id]);
-        $deleteurl = new moodle_url('/admin/tool/openapi/pages/delete_ip_rule.php', ['id' => $rule->id]);
+        $editurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/edit.php', ['id' => $rule->id]);
+        $deleteurl = new moodle_url('/admin/tool/openapi/pages/ip_rules/delete.php', ['id' => $rule->id]);
         $actions = html_writer::link($editurl, get_string('edit'), ['class' => 'btn btn-outline-secondary btn-sm mr-1'])
             . html_writer::link($deleteurl, get_string('delete'), ['class' => 'btn btn-outline-danger btn-sm']);
 
