@@ -40,4 +40,17 @@ $definitions = [
         'simpledata' => false,
         'staticacceleration' => true,
     ],
+
+    // Holds a freshly generated plugin token in plaintext, keyed by
+    // tool_openapi_tokens.id, so pages/tokens.php can show it exactly once
+    // after a Post/Redirect/Get -- same pattern local_servicemanager uses
+    // for its own service tokens (db/caches.php's 'newtoken'). Session
+    // scoped and short-lived so the plaintext does not linger in the
+    // session longer than it takes to redirect and render it once.
+    'newtoken' => [
+        'mode' => cache_store::MODE_SESSION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 300,
+    ],
 ];

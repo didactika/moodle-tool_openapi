@@ -21,9 +21,10 @@
  * an admin tool gets that category for free, unlike a local plugin. See
  * 02-arquitectura.md.
  *
- * Deliberately minimal so far: just the cache purge action fase 4 needs.
- * The access-method toggles (enablesessiongate and friends) and the
- * viewer/Swagger UI page are fase 5's own scope -- see
+ * The settings page itself is deliberately minimal so far: just the cache
+ * purge action fase 4 needs, plus links to the tokens/IP rules admin
+ * pages. The access-method toggles (enablesessiongate and friends) and
+ * the viewer/Swagger UI page are fase 5's own scope -- see
  * 06-comandos-pendientes.md for why that split is not a half-finished
  * vertical slice: every gate is already closed by default via get_config()
  * returning falsy when unset, so nothing here is required for the access
@@ -39,6 +40,20 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
+    $ADMIN->add('tools', new admin_externalpage(
+        'tool_openapi_tokens',
+        get_string('managetokens', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/tokens.php'),
+        'tool/openapi:manage'
+    ));
+
+    $ADMIN->add('tools', new admin_externalpage(
+        'tool_openapi_ip_rules',
+        get_string('manageiprules', 'tool_openapi'),
+        new moodle_url('/admin/tool/openapi/pages/ip_rules.php'),
+        'tool/openapi:manage'
+    ));
+
     $settings = new admin_settingpage('tool_openapi', get_string('pluginname', 'tool_openapi'), 'tool/openapi:manage');
 
     if ($ADMIN->fulltree) {
