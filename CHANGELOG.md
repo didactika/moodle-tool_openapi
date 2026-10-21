@@ -21,6 +21,12 @@ its own $plugin->release line -- no need to reconcile entries across branches.
 
 ## [Unreleased]
 
+### Added
+
+- `cli/generate.php` writes the document from the command line, without a
+  request or a token: `--service` and `--output`, built fresh with server
+  URLs relative to the site. An unknown service exits non-zero.
+
 ## [1.0.0]
 
 First release.
