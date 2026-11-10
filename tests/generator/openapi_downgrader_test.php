@@ -73,6 +73,38 @@ final class openapi_downgrader_test extends \basic_testcase {
     }
 
     /**
+     * 3.0 has no 'null' type: a schema that is only null (a function with
+     * no return value) becomes the one value it can hold. 3.0 also forbids
+     * nullable without a type, hence the placeholder object type.
+     */
+    public function test_null_only_type_becomes_a_nullable_null_enum(): void {
+        $document = $this->document_with_schema(['type' => 'null']);
+
+        $schema = $this->schema_from(openapi_downgrader::to_3_0($document));
+
+        $this->assertSame(['type' => 'object', 'nullable' => true, 'enum' => [null]], $schema);
+    }
+
+    /**
+     * Several real types (PARAM_RAW in a response) have no 3.0 type
+     * spelling: they become an anyOf, each branch nullable when null was
+     * allowed, since 3.0 ignores nullable on a schema without a type.
+     */
+    public function test_several_types_become_an_any_of(): void {
+        $document = $this->document_with_schema(['description' => 'Raw', 'type' => ['string', 'number', 'null']]);
+
+        $schema = $this->schema_from(openapi_downgrader::to_3_0($document));
+
+        $this->assertSame([
+            'description' => 'Raw',
+            'anyOf' => [
+                ['type' => 'string', 'nullable' => true],
+                ['type' => 'number', 'nullable' => true],
+            ],
+        ], $schema);
+    }
+
+    /**
      * A non-nullable scalar type is left untouched.
      */
     public function test_non_nullable_types_are_left_alone(): void {

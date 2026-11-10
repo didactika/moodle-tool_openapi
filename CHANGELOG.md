@@ -21,6 +21,59 @@ its own $plugin->release line -- no need to reconcile entries across branches.
 
 ## [Unreleased]
 
+### Fixed
+
+- Webservice errors are now documented inside the `200` response (`anyOf`
+  the result or `WebserviceError`), since Moodle's REST server answers every
+  error with HTTP 200. The `default` response, which no real request ever
+  hit, is gone; `403` documents web services or REST being disabled.
+- `WebserviceError` matches what Moodle emits: `errorcode` is optional and
+  `debuginfo` (debugging on only) is declared.
+- A function without a return value documents the JSON literal `null` on
+  success instead of an empty body (3.0: `nullable` + `enum: [null]`).
+- `moodlewsrestformat` is required and `json`-only. It used to advertise a
+  `json` default although Moodle falls back to XML when it is omitted.
+- Request bodies spell out Moodle's PHP bracket encoding
+  (`courseids[0]=2`, `users[0][username]=…`), booleans as `0`/`1`, and
+  unknown keys being rejected, with an `x-moodle-encoding: php-brackets`
+  extension.
+- `PARAM_RAW` in a response is `string | number | boolean`: Moodle hands
+  the value back uncleaned, so a PHP int or bool reaches the client as is.
+  Request bodies, form-encoded, keep `string`. 3.0 spells it as an `anyOf`.
+- `PARAM_PERMISSION` is an `integer`.
+- `PARAM_URL` and `PARAM_LOCALURL` use `format: uri-reference` (relative URLs
+  and `''` are valid values); `PARAM_EMAIL` has no `format`, since an invalid
+  address is cleaned to `''`.
+- Parameter defaults are documented as the value Moodle uses (`0`, not
+  `"0"`; `true`, not `1`), and a default Moodle would reject is left out.
+- A `VALUE_DEFAULT` scalar in a response is `required`: Moodle fills it in
+  when the function leaves it out.
+- A document narrowed by `?service=` or by the caller's scope declares only
+  the tags its operations use, instead of every group on the site.
+- Blank lines in descriptions are kept as paragraph breaks.
+
+### Changed
+
+- `wstoken` is a security scheme (`apiKey` in the query) instead of a
+  parameter of every operation: the viewer asks for it once under
+  Authorize, and a generated client takes it as auth. The request on the
+  wire is unchanged. Clients generated before this pass it per call and need
+  regenerating.
+- `wsfunction` is no longer a parameter: the path's last segment already
+  names the function, and the viewer adds it when it retargets Try it out to
+  `server.php`. A client maps the path the same way.
+
+### Added
+
+- The viewer's Try it out sends the body in Moodle's bracket syntax, rebuilt
+  from the values typed in: arrays as `name[0]`, JSON objects flattened to
+  `name[key]`, booleans as `1`/`0`, empty values left out. Swagger UI's own
+  encoding (comma-joined arrays, JSON strings, `true`) is rejected by Moodle.
+- `x-moodle-skipped-functions` at the document root lists the functions that
+  could not be introspected, instead of dropping them silently.
+- Core's warning and file items are shared as `components/schemas/Warning`
+  and `File` where a function uses them unchanged.
+
 ## [1.0.0]
 
 First release.
