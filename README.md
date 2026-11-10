@@ -64,13 +64,13 @@ Whoever can run PHP on the site can write the document without a request,
 a token or an access method turned on:
 
 ```console
-$ php admin/tool/openapi/cli/generate.php --service=my_service --output=openapi.json
+$ php admin/tool/openapi/cli/generate.php --service=my_service --protocol=restful --output=openapi.json
 ```
 
-`--service` means what it means on the endpoint; without
+`--service` and `--protocol` mean what they mean on the endpoint; without
 `--output` the JSON goes to standard output. The document is built fresh,
 not read from the cache, and its server URL is relative to the site. An
-unknown service is an error on standard error with a non-zero
+unknown service or protocol is an error on standard error with a non-zero
 exit status. See [docs/automation.md](docs/automation.md#from-the-command-line).
 
 ## What it is not

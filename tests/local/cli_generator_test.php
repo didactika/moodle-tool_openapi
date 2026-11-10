@@ -80,6 +80,34 @@ final class cli_generator_test extends \advanced_testcase {
     }
 
     /**
+     * --protocol=restful converts the document, with the endpoint relative to the site.
+     */
+    public function test_converts_to_restful(): void {
+        $this->resetAfterTest();
+
+        $this->create_service('tool_openapi_test_service', ['core_webservice_get_site_info']);
+
+        $doc = cli_generator::generate('tool_openapi_test_service', 'restful');
+
+        $this->assertSame([['url' => '/webservice/restful/server.php']], $doc['servers']);
+        $this->assertSame('Authorization', $doc['components']['securitySchemes']['wstoken']['name']);
+        $this->assertArrayNotHasKey('parameters', $doc['components']);
+        $operation = $doc['paths']['/core_webservice_get_site_info']['post'];
+        $this->assertSame(['application/json'], array_keys($operation['requestBody']['content']));
+    }
+
+    /**
+     * An unknown protocol is rejected before anything is built.
+     */
+    public function test_rejects_an_unknown_protocol(): void {
+        $this->resetAfterTest();
+
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('invalidprotocol', 'tool_openapi', 'soap'));
+        cli_generator::generate(null, 'soap');
+    }
+
+    /**
      * An unknown service is rejected, not answered with the whole catalog.
      */
     public function test_rejects_an_unknown_service(): void {

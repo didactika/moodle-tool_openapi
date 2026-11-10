@@ -29,8 +29,8 @@ require(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 
 [$options, $unrecognized] = cli_get_params(
-    ['service' => null, 'output' => null, 'help' => false],
-    ['s' => 'service', 'o' => 'output', 'h' => 'help']
+    ['service' => null, 'protocol' => 'rest', 'output' => null, 'help' => false],
+    ['s' => 'service', 'p' => 'protocol', 'o' => 'output', 'h' => 'help']
 );
 
 if ($unrecognized) {
@@ -42,6 +42,9 @@ if ($options['help']) {
 
 Options:
 -s, --service=<shortname>  Only the functions of this external service (default: the whole catalog)
+-p, --protocol=rest|restful
+                           rest: core's webservice/rest/server.php (default);
+                           restful: webservice_restful's per-function URLs
 -o, --output=<file>        Write to this file instead of standard output
 -h, --help                 Print this help
 
@@ -49,20 +52,20 @@ Server URLs are relative to the site, so the document does not depend on the
 wwwroot of the machine that generated it.
 
 Example:
-\$ php admin/tool/openapi/cli/generate.php --service=my_service --output=openapi.json
+\$ php admin/tool/openapi/cli/generate.php --service=my_service --protocol=restful --output=openapi.json
 ";
     exit(0);
 }
 
 // An option given without "=value" comes back as true.
-foreach (['service', 'output'] as $name) {
+foreach (['service', 'protocol', 'output'] as $name) {
     if ($options[$name] === true || $options[$name] === '') {
         cli_error("--{$name} needs a value, see --help");
     }
 }
 
 try {
-    $document = \tool_openapi\local\cli_generator::generate($options['service']);
+    $document = \tool_openapi\local\cli_generator::generate($options['service'], (string) $options['protocol']);
 } catch (\moodle_exception $e) {
     cli_error($e->getMessage());
 }

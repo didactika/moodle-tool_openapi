@@ -17,6 +17,7 @@
 namespace tool_openapi\local;
 
 use tool_openapi\generator\document_builder;
+use tool_openapi\generator\restful_converter;
 use tool_openapi\generator\service_filter;
 
 /**
@@ -26,7 +27,7 @@ use tool_openapi\generator\service_filter;
  * Same pipeline as openapi.php minus the access check (whoever runs a CLI
  * script already has the site's code and database): a fresh build rather
  * than the cache, so a function installed since the last cache rebuild is
- * not missed, then the service filter.
+ * not missed, then the service filter and the protocol conversion.
  *
  * The server URL is made relative to the site: a CLI run sees the wwwroot
  * of its own config.php, which in a container or a CI job is rarely the URL
@@ -38,19 +39,30 @@ use tool_openapi\generator\service_filter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class cli_generator {
+    /** @var string[] The protocols openapi.php accepts in ?protocol=. */
+    public const PROTOCOLS = ['rest', 'restful'];
+
     /**
      * Build the document for the whole catalog or one external service.
      *
      * @param string|null $service An external_services.shortname, or null for the whole catalog.
+     * @param string $protocol One of self::PROTOCOLS.
      * @return array
-     * @throws \moodle_exception If no service has that shortname.
+     * @throws \moodle_exception If the protocol is unknown or no service has that shortname.
      */
-    public static function generate(?string $service): array {
+    public static function generate(?string $service, string $protocol = 'rest'): array {
         global $CFG;
+
+        if (!in_array($protocol, self::PROTOCOLS, true)) {
+            throw new \moodle_exception('invalidprotocol', 'tool_openapi', '', $protocol);
+        }
 
         $document = document_builder::build();
         if ($service !== null) {
             $document = service_filter::filter($document, $service);
+        }
+        if ($protocol === 'restful') {
+            $document = restful_converter::convert($document);
         }
 
         foreach ($document['servers'] as $i => $server) {
