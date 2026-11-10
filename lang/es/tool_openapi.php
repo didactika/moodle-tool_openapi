@@ -64,6 +64,7 @@ $string['gatetoken_desc'] = 'Una petición con un token emitido por este plugin,
 $string['gatewstoken'] = 'Token de servicio web existente';
 $string['gatewstoken_desc'] = 'Una petición con un token de servicio web de Moodle ya existente, reutilizado para leer la documentación en lugar de emitir un segundo secreto.';
 $string['invalidiprange'] = 'No es una dirección IP ni un rango CIDR válidos.';
+$string['invalidprotocol'] = 'Protocolo desconocido «{$a}»: use rest o restful.';
 $string['invalidservice'] = 'No existe ningún servicio externo con el nombre corto «{$a}».';
 $string['iprange'] = 'Dirección IP o rango CIDR';
 $string['iprange_desc'] = 'Una dirección concreta (192.0.2.1) o un rango CIDR (192.0.2.0/24). Se pueden indicar varias separadas por comas.';
@@ -106,4 +107,5 @@ $string['viewer'] = 'Abrir el visor interactivo';
 $string['viewerheading'] = 'Visor interactivo';
 $string['viewerheading_desc'] = 'Consulta todas las funciones que expone este sitio, con sus parámetros, la forma de su respuesta y las capacidades que requiere.';
 $string['viewerrestdisabled'] = '«Try it out» fallará mientras este sitio tenga los servicios web o el protocolo REST desactivados: Moodle responde a esas peticiones con un 403 vacío. Consultar el catálogo de abajo funciona igual. <a href="{$a}">Activar los servicios web</a>.';
-$string['viewertokenhint'] = 'Las peticiones enviadas desde aquí van al endpoint REST de este sitio. Pon un token en el campo wstoken de la operación antes de usar «Try it out» o Moodle rechazará la petición.';
+$string['viewertokenhint'] = 'Las peticiones enviadas desde aquí van al endpoint REST de este sitio. Introduce un token de servicio web una vez en «Authorize» antes de usar «Try it out» o Moodle rechazará la petición.';
+$string['viewertokenhint_restful'] = 'Las peticiones enviadas desde aquí van al endpoint webservice_restful de este sitio, en JSON. Introduce un token de servicio web una vez en «Authorize» antes de usar «Try it out»; su usuario necesita webservice/restful:use.';

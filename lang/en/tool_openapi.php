@@ -64,6 +64,7 @@ $string['gatetoken_desc'] = 'A request bearing a token issued by this plugin, se
 $string['gatewstoken'] = 'Existing webservice token';
 $string['gatewstoken_desc'] = 'A request bearing an existing Moodle webservice token, reused for reading documentation instead of issuing a second secret.';
 $string['invalidiprange'] = 'Not a valid IP address or CIDR range.';
+$string['invalidprotocol'] = 'Unknown protocol \'{$a}\': use rest or restful.';
 $string['invalidservice'] = 'No external service exists with shortname \'{$a}\'.';
 $string['iprange'] = 'IP address or CIDR range';
 $string['iprange_desc'] = 'A single address (192.0.2.1) or a CIDR range (192.0.2.0/24). Several entries can be comma-separated.';
@@ -106,4 +107,5 @@ $string['viewer'] = 'Open the interactive viewer';
 $string['viewerheading'] = 'Interactive viewer';
 $string['viewerheading_desc'] = 'Browse every function this site exposes, with its parameters, its return shape and the capabilities it requires.';
 $string['viewerrestdisabled'] = 'Try it out will fail while this site has web services or the REST protocol turned off: Moodle answers those requests with an empty 403. Browsing the catalog below works either way. <a href="{$a}">Enable web services</a>.';
-$string['viewertokenhint'] = 'Requests sent from here go to this site\'s REST endpoint. Put a token in the wstoken field of an operation before using Try it out, otherwise Moodle will reject the request.';
+$string['viewertokenhint'] = 'Requests sent from here go to this site\'s REST endpoint. Enter a webservice token once under Authorize before using Try it out, otherwise Moodle will reject the request.';
+$string['viewertokenhint_restful'] = 'Requests sent from here go to this site\'s webservice_restful endpoint, as JSON. Enter a webservice token once under Authorize before using Try it out; its user needs webservice/restful:use.';

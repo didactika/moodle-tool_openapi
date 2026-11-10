@@ -39,6 +39,30 @@ jobs:
       - run: git diff --exit-code spec/openapi.yaml
 ```
 
+## From the command line
+
+On a machine that runs the site (or a container of it), skip HTTP and the
+token entirely:
+
+```console
+php admin/tool/openapi/cli/generate.php --service=<shortname> --protocol=restful --output=openapi.json
+```
+
+| Option | Default | |
+| --- | --- | --- |
+| `--service=<shortname>` | the whole catalog | Only that external service's functions, like `?service=` |
+| `--protocol=rest\|restful` | `rest` | Like `?protocol=` |
+| `--output=<file>` | standard output | Where to write the JSON |
+
+The document is the one `openapi.php` would serve an unrestricted caller,
+built fresh rather than read from the cache, in OpenAPI 3.1 JSON with the
+same encoding plus a trailing newline. One difference: the server URL is
+relative to the site (`/` for REST, `/webservice/restful/server.php` for
+RESTful), since the `wwwroot` a CLI run sees is often not the URL clients
+call, and a committed snapshot should not change with the machine that made
+it. An unknown service or protocol prints the reason on standard error and
+exits non-zero, so a pipeline fails instead of committing an error.
+
 ## Three things that will bite you
 
 **Size.** The full catalog is around 10 MB of JSON or 5 MB of YAML. Committed
@@ -62,6 +86,11 @@ normalised copy, not on the raw bytes.
 - **Generate a client:** `openapi-generator-cli generate -i openapi.yaml -g <language>`.
 - **Watch the API surface:** commit a normalised copy and let the pull request
   show what an upgrade added or removed.
+
+A client generated from the default document cannot call Moodle as is: core's
+REST protocol wants one URL and a PHP-bracket form body. With
+`webservice_restful` installed, generate from `?protocol=restful` instead, see
+[openapi-document.md](openapi-document.md#the-restful-protocol).
 
 If a generator rejects the document, try `?version=3.0` first: plenty of
 tooling still cannot read OpenAPI 3.1, and the plugin emits a 3.0 rendering of

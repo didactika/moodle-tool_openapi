@@ -64,6 +64,7 @@ $string['gatetoken_desc'] = 'Une requête portant un jeton émis par ce plugin, 
 $string['gatewstoken'] = 'Jeton de service web existant';
 $string['gatewstoken_desc'] = 'Une requête portant un jeton de service web Moodle existant, réutilisé pour lire la documentation plutôt que d\'émettre un second secret.';
 $string['invalidiprange'] = 'Ce n\'est pas une adresse IP ni une plage CIDR valide.';
+$string['invalidprotocol'] = 'Protocole inconnu « {$a} » : utilisez rest ou restful.';
 $string['invalidservice'] = 'Aucun service externe ne porte le nom abrégé « {$a} ».';
 $string['iprange'] = 'Adresse IP ou plage CIDR';
 $string['iprange_desc'] = 'Une adresse unique (192.0.2.1) ou une plage CIDR (192.0.2.0/24). Plusieurs entrées peuvent être séparées par des virgules.';
@@ -106,4 +107,5 @@ $string['viewer'] = 'Ouvrir la visionneuse interactive';
 $string['viewerheading'] = 'Visionneuse interactive';
 $string['viewerheading_desc'] = 'Parcourez toutes les fonctions exposées par ce site, avec leurs paramètres, la forme de leur réponse et les capacités qu\'elles exigent.';
 $string['viewerrestdisabled'] = '« Try it out » échouera tant que ce site aura les services web ou le protocole REST désactivés : Moodle répond à ces requêtes par un 403 vide. Parcourir le catalogue ci-dessous fonctionne quand même. <a href="{$a}">Activer les services web</a>.';
-$string['viewertokenhint'] = 'Les requêtes envoyées d\'ici vont vers le point d\'accès REST de ce site. Renseignez un jeton dans le champ wstoken de l\'opération avant d\'utiliser « Try it out », sinon Moodle rejettera la requête.';
+$string['viewertokenhint'] = 'Les requêtes envoyées d\'ici vont vers le point d\'accès REST de ce site. Renseignez une fois un jeton de service web dans « Authorize » avant d\'utiliser « Try it out », sinon Moodle rejettera la requête.';
+$string['viewertokenhint_restful'] = 'Les requêtes envoyées d\'ici vont vers le point d\'accès webservice_restful de ce site, en JSON. Renseignez une fois un jeton de service web dans « Authorize » avant d\'utiliser « Try it out » ; son utilisateur doit avoir webservice/restful:use.';

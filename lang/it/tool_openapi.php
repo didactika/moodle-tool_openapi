@@ -64,6 +64,7 @@ $string['gatetoken_desc'] = 'Una richiesta con un token emesso da questo plugin,
 $string['gatewstoken'] = 'Token di web service esistente';
 $string['gatewstoken_desc'] = 'Una richiesta con un token di web service Moodle già esistente, riutilizzato per leggere la documentazione invece di emettere un secondo segreto.';
 $string['invalidiprange'] = 'Non è un indirizzo IP né un intervallo CIDR valido.';
+$string['invalidprotocol'] = 'Protocollo sconosciuto «{$a}»: usare rest o restful.';
 $string['invalidservice'] = 'Non esiste alcun servizio esterno con nome breve «{$a}».';
 $string['iprange'] = 'Indirizzo IP o intervallo CIDR';
 $string['iprange_desc'] = 'Un singolo indirizzo (192.0.2.1) o un intervallo CIDR (192.0.2.0/24). È possibile indicarne diversi separati da virgole.';
@@ -106,4 +107,5 @@ $string['viewer'] = 'Apri il visualizzatore interattivo';
 $string['viewerheading'] = 'Visualizzatore interattivo';
 $string['viewerheading_desc'] = 'Consulta tutte le funzioni esposte da questo sito, con i relativi parametri, la forma della risposta e le capacità richieste.';
 $string['viewerrestdisabled'] = '«Try it out» fallirà finché questo sito ha i web service o il protocollo REST disattivati: Moodle risponde a quelle richieste con un 403 vuoto. Consultare il catalogo qui sotto funziona comunque. <a href="{$a}">Attivare i web service</a>.';
-$string['viewertokenhint'] = 'Le richieste inviate da qui vanno all\'endpoint REST di questo sito. Inserisci un token nel campo wstoken dell\'operazione prima di usare «Try it out», altrimenti Moodle rifiuterà la richiesta.';
+$string['viewertokenhint'] = 'Le richieste inviate da qui vanno all\'endpoint REST di questo sito. Inserisci un token del servizio web una volta in «Authorize» prima di usare «Try it out», altrimenti Moodle rifiuterà la richiesta.';
+$string['viewertokenhint_restful'] = 'Le richieste inviate da qui vanno all\'endpoint webservice_restful di questo sito, in JSON. Inserisci un token del servizio web una volta in «Authorize» prima di usare «Try it out»; il suo utente deve avere webservice/restful:use.';

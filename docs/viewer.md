@@ -42,7 +42,7 @@ This is Moodle's own configuration, not the plugin's: **Site administration
 a bare `403` with an empty body, which explains nothing at all — so the
 viewer checks the same condition and warns you before you press Execute.
 
-**2. You need a token in the `wstoken` field.** A Moodle *webservice* token,
+**2. You need a token, entered once under Authorize.** A Moodle *webservice* token,
 not one issued by this plugin: this is a real API call, and plugin tokens
 only authorize reading documentation. Create one under **Site administration
 → Server → Web services → Manage tokens**.
@@ -51,7 +51,8 @@ only authorize reading documentation. Create one under **Site administration
 service that includes it. The viewer documents what the site exposes; it does
 not grant anything.
 
-`wsfunction` arrives filled in — the document pins it per operation — and
+Swagger UI adds it to every request as `?wstoken=`. There is no
+`wsfunction` field: the viewer takes it from the operation's path. And
 `moodlewsrestformat` defaults to `json`. Without that last one Moodle
 answers in XML.
 
@@ -61,10 +62,34 @@ Each function is documented at a path of its own (`/core_user_get_users`),
 because OpenAPI cannot describe one path as several hundred operations.
 Moodle has a single endpoint and selects the function with a parameter. So
 before sending, the viewer rewrites the request to
-`/webservice/rest/server.php`, keeping the query string the operation built.
+`/webservice/rest/server.php?wsfunction=<the path's name>`, keeping the
+query string the operation built.
 
 Only operations are rewritten. The viewer's own fetch of the document is left
 alone.
+
+### How the body is sent
+
+Swagger UI's own form encoding is not one Moodle reads: it joins an array's
+items with commas, sends an object as JSON and a boolean as `true`. The
+viewer rebuilds the body from the values you typed, in Moodle's bracket
+syntax: an array field's items become `name[0]`, `name[1]`; an object field
+takes JSON (`{"ids": [2, 3]}` becomes `options[ids][0]=2&options[ids][1]=3`);
+booleans are sent as `1`/`0`. An empty field, or a `null` inside the JSON,
+is left out, so Moodle applies the parameter's default.
+
+### The RESTful switch
+
+When Catalyst's
+[webservice_restful](https://github.com/catalyst/moodle-webservice_restful)
+is installed, a **REST / RESTful** switch sits above the catalog. RESTful
+loads the `?protocol=restful` document (see
+[openapi-document.md](openapi-document.md#the-restful-protocol)) and Try it
+out sends what that document describes, untouched: `POST
+/webservice/restful/server.php/<function>`, the token from Authorize in the
+`Authorization` header, and the body as JSON, typed into the editor as is.
+The protocol must be enabled, and the token's user needs
+`webservice/restful:use`.
 
 ## Downloads
 
